@@ -1,0 +1,1226 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DOCKX — Validatiedocument belscripts</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap');
+  :root{
+    --navy:#0E426A; --teal:#37999C; --orange:#F79151;
+    --ink:#1B2B38; --muted:#5C7488; --line:#E2E9EE; --line-soft:#EEF3F6;
+    --bg:#F5F8FA; --teal-soft:#E4F1F1; --orange-soft:#FCEDE0;
+    --paper:#fff;
+  }
+  .login-gate{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0E426A,#0A3556);
+    display:flex;align-items:center;justify-content:center;padding:20px}
+  .login-card{background:#fff;border-radius:16px;padding:34px 30px;max-width:380px;width:100%;
+    box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center}
+  .login-logo{font-size:17px;color:var(--navy);margin-bottom:18px;display:flex;align-items:center;justify-content:center;gap:7px}
+  .login-logo b{font-weight:800} .login-logo .login-smiley{background:var(--navy);color:#fff;width:26px;height:26px;
+    border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:15px}
+  .login-title{font-size:20px;font-weight:800;color:var(--navy);margin-bottom:7px}
+  .login-sub{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:20px}
+  .login-input{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:11px 13px;font-family:inherit;
+    font-size:14px;color:var(--ink);box-sizing:border-box;margin-bottom:12px}
+  .login-input:focus{outline:2px solid var(--teal-soft);border-color:var(--teal)}
+  .login-err{font-size:12.5px;color:#C0392B;margin-bottom:12px;font-weight:600}
+  .login-btn{width:100%;background:var(--navy);color:#fff;border:none;border-radius:9px;padding:12px;
+    font-family:inherit;font-size:14px;font-weight:700;cursor:pointer}
+  .login-btn:hover{background:#0A3556}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:'Raleway',system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px 80px}
+
+  /* Header */
+  .masthead{background:var(--navy);color:#fff;position:relative;overflow:hidden}
+  .masthead::before{content:"";position:absolute;right:-80px;top:-120px;width:320px;height:320px;border-radius:50%;
+    border:2px solid rgba(255,255,255,.08);box-shadow:0 0 0 26px rgba(255,255,255,.05),0 0 0 60px rgba(255,255,255,.035)}
+  .mast-in{max-width:880px;margin:0 auto;padding:28px 22px 30px;position:relative;z-index:1}
+  .brand{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+  .smiley{width:34px;height:34px;border-radius:50%;background:#fff;position:relative;flex:0 0 auto}
+  .smiley::before{content:"";position:absolute;width:13px;height:6px;border:2.4px solid var(--navy);border-top:none;
+    border-radius:0 0 13px 13px;left:50%;top:50%;transform:translate(-50%,-2px)}
+  .smiley i{position:absolute;width:3px;height:3px;background:var(--navy);border-radius:50%;top:11px}
+  .smiley i:first-child{left:9px} .smiley i:last-child{right:9px}
+  .brand b{font-weight:800;font-size:16px;letter-spacing:.01em}
+  .brand em{font-style:normal;color:var(--orange)}
+  .brand small{display:block;font-weight:600;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:1px}
+  .mast-tag{display:inline-block;padding:4px 11px;border-radius:7px;background:rgba(255,255,255,.12);
+    font-size:11px;font-weight:700;letter-spacing:.1em;margin-bottom:14px}
+  .mast-tag span{color:var(--orange)}
+  h1{font-size:30px;font-weight:800;margin:0 0 8px;letter-spacing:-.01em;line-height:1.15}
+  .mast-sub{font-size:14.5px;color:rgba(255,255,255,.78);max-width:620px;font-weight:500}
+
+  /* Summary bar */
+  .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:-26px auto 30px;max-width:880px;
+    padding:0 22px;position:relative;z-index:2}
+  .sum-card{background:var(--paper);border-radius:13px;padding:16px 18px;box-shadow:0 6px 24px rgba(14,66,106,.09);
+    border:1px solid var(--line)}
+  .sum-num{font-size:30px;font-weight:800;line-height:1;color:var(--navy)}
+  .sum-card.teal .sum-num{color:var(--teal)} .sum-card.orange .sum-num{color:#D97A2B}
+  .sum-lbl{font-size:12px;color:var(--muted);font-weight:600;margin-top:6px;line-height:1.35}
+
+  /* How-to */
+  .howto{background:var(--teal-soft);border-radius:13px;padding:16px 20px;margin-bottom:34px;font-size:13.5px;
+    color:#1F4E50;line-height:1.6}
+  .howto b{font-weight:700}
+
+  /* Section */
+  .sec{margin-bottom:42px}
+  .sec-head{display:flex;align-items:baseline;gap:11px;margin-bottom:6px;border-bottom:2px solid var(--navy);padding-bottom:9px}
+  .sec-no{font-size:13px;font-weight:800;color:var(--teal);letter-spacing:.04em}
+  .sec-title{font-size:19px;font-weight:800;color:var(--navy)}
+  .sec-count{margin-left:auto;font-size:12px;color:var(--muted);font-weight:600}
+  .sec-intro{font-size:13px;color:var(--muted);margin:10px 0 18px;line-height:1.55}
+
+  /* Item card */
+  .item{border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden;background:var(--paper);
+    break-inside:avoid;page-break-inside:avoid}
+  .item-top{display:flex;align-items:flex-start;gap:13px;padding:14px 16px}
+  .item-main{flex:1;min-width:0}
+  .item-topic{font-size:15px;font-weight:700;color:var(--navy)}
+  .item-meta{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:2px}
+  .item-body{font-size:13px;line-height:1.6;color:#33536B;white-space:pre-wrap;
+    border-top:1px solid var(--line-soft);padding:13px 16px;background:#FCFDFD}
+  .item-body.struct{white-space:normal}
+  .item-body.tight{max-height:none}
+  /* structured content */
+  .vb-intro{background:var(--teal-soft);border-radius:9px;padding:11px 13px;margin-bottom:13px;font-size:12.5px;line-height:1.55;color:#1F4E50}
+  .vb-intro p{margin:0 0 7px} .vb-intro p:last-child{margin:0}
+  .vb-overview{display:flex;flex-direction:column;gap:7px}
+  .vb-row{display:block;border:1px solid #C2D0DA;border-radius:9px;overflow:hidden}
+  .vb-row.gap{border-color:#E8A07A}
+  .vb-als{background:var(--bg);padding:10px 12px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:5px;border-bottom:1px solid #C2D0DA}
+  .vb-dan{padding:11px 12px;background:#fff}
+  .vb-row.gap .vb-dan{background:var(--orange-soft)}
+  .vb-cond{display:inline-block;background:#fff;border:1px solid #C9D8E0;border-radius:6px;padding:3px 9px;font-size:11.5px;font-weight:600;color:var(--navy)}
+  .vb-condsep{color:#A9BAC4;font-size:10px;font-weight:700}
+  .vb-cond-urg{display:inline-flex;align-items:center;gap:5px}
+  .urg-help{width:17px;height:17px;border-radius:50%;border:none;background:#7A68A8;color:#fff;font-size:11px;
+    font-weight:800;line-height:1;cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center;font-family:inherit}
+  .urg-help:hover{background:#5B4B8A}
+  .urg-flash{animation:urgflash 1.2s ease}
+  @keyframes urgflash{0%,100%{box-shadow:0 0 0 0 rgba(122,104,168,0)}30%{box-shadow:0 0 0 4px rgba(122,104,168,.35)}}
+  .vb-acts{margin:0;padding-left:17px} .vb-acts li{font-size:12.5px;line-height:1.5;color:#33536B;margin-bottom:3px}
+  .vb-gap{font-size:12px;font-weight:600;color:#B5611F}
+  .vb-gap-wrap{display:flex;flex-direction:column;gap:7px}
+  .vb-gap-reason{font-size:12px;line-height:1.5;color:#8A6A3A}
+  .vb-gap-field{width:100%;border:1.5px solid #E8A07A;border-radius:8px;padding:8px 10px;font-family:inherit;
+    font-size:12.5px;line-height:1.5;color:var(--ink);background:#fff;resize:vertical}
+  .vb-gap-field:focus{outline:2px solid #F4D2BE;border-color:#D97A2B}
+  .vb-steps{margin:0;padding-left:19px} .vb-steps li{font-size:13px;line-height:1.6;color:#33536B;margin-bottom:5px}
+  .vb-infolist{display:flex;flex-direction:column;gap:10px}
+  .vb-item{font-size:13px;line-height:1.6;color:#33536B}
+  .vb-lbl{font-weight:700;color:var(--navy);margin-right:7px}
+  .vb-bodytext{color:#33536B}
+  .vb-sub{margin:6px 0 0;padding-left:18px} .vb-sub li{font-size:12.5px;line-height:1.5;color:#3C5A6E;margin-bottom:3px}
+  .vb-item:has(.vb-sub) .vb-lbl{display:inline-block;margin-bottom:2px}
+  .vb-sep{height:1px;background:var(--line-soft);margin:5px 0}
+  .vb-plain{white-space:pre-wrap;font-size:13px;line-height:1.6;color:#33536B}
+  .vb-fiche{background:#FCFDFD;border:1px solid #D7E0E7;border-radius:9px;padding:11px 13px;margin-bottom:8px}
+  .vb-fiche-h{font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  /* urgency helper */
+  .urg-wrap{border:1px solid #D9C9E6;border-radius:10px;background:#FAF7FD;margin-bottom:14px;overflow:hidden}
+  .urg-sum{cursor:pointer;list-style:none;padding:11px 14px;font-size:13px;font-weight:700;color:#5B4B8A;
+    display:flex;align-items:center;gap:9px}
+  .urg-ctrl{margin-left:auto;display:inline-flex;gap:4px}
+  .urg-midnotice{display:flex;align-items:flex-start;gap:9px;background:#FCF1DD;border:1px solid #E8C98A;border-radius:9px;
+    padding:10px 12px;margin-bottom:12px;font-size:12px;line-height:1.5;color:#7A5A1E}
+  .urg-midnotice svg{width:16px;height:16px;stroke:#B6862B;flex:0 0 auto;margin-top:1px}
+  .urg-midnotice b{font-weight:700}
+  .urg-edithint{font-size:11.5px;color:#8A6A3A;font-style:italic;margin-bottom:8px}
+  .urg-edit-title{width:100%;border:1.5px solid var(--line);border-radius:7px;padding:5px 8px;font-family:inherit;
+    font-size:12.5px;font-weight:700;color:var(--navy);margin:3px 0 5px}
+  .urg-edit-ex{width:100%;border:1.5px solid var(--line);border-radius:7px;padding:6px 8px;font-family:inherit;
+    font-size:12px;line-height:1.45;color:var(--ink);resize:vertical}
+  .urg-edit-title:focus,.urg-edit-ex:focus{outline:2px solid var(--teal-soft);border-color:var(--teal)}
+  .urg-wrap.editing{border-color:var(--orange)}
+  .urg-sum::-webkit-details-marker{display:none}
+  .urg-sum svg{width:17px;height:17px;stroke:#7A68A8;flex:0 0 auto}
+  .urg-sum:hover{background:#F3EEFA}
+  .urg-inner{padding:4px 14px 14px}
+  .urg-intro{font-size:12px;line-height:1.55;color:#5C5470;margin-bottom:11px}
+  .urg-bands{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+  .urg-band{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+  .urg-band.urg-low{background:#E4F1E8;color:#2F7D4F} .urg-band.urg-mid{background:#FCF1DD;color:#9A6A1E} .urg-band.urg-high{background:#FBE3E0;color:#B23B2E}
+  .urg-levels{display:flex;flex-direction:column;gap:4px}
+  .urg-row{display:flex;align-items:flex-start;gap:11px;padding:7px 9px;border-radius:8px;background:#fff;border:1px solid var(--line-soft)}
+  .urg-num{width:26px;height:26px;flex:0 0 auto;border-radius:7px;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;color:#fff}
+  .urg-low .urg-num{background:#5AAE78} .urg-mid .urg-num{background:#E0A33C} .urg-high .urg-num{background:#D9604F}
+  .urg-title{font-size:12.5px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .urg-ex{font-size:12px;line-height:1.45;color:#516375;margin-top:2px}
+  .urg-src{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;background:#E4F1F1;color:#1F6E70;border-radius:4px;padding:1px 5px}
+  .urg-concept{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;background:#fff;color:#B5611F;border:1px solid #E8C9A6;border-radius:4px;padding:1px 5px}
+  /* say / do blocks */
+  .sd-say{background:var(--teal-soft);border:1px solid #9FCBCC;border-radius:9px;padding:10px 12px;margin-bottom:8px}
+  .sd-do{border-radius:9px;padding:10px 12px;margin-bottom:8px}
+  .sd-do:last-child{margin-bottom:0}
+  .sd-agent{background:#F4F8FA;border:1px solid #B4C6D2}
+  .sd-bot{background:#F3F0FA;border:1px solid #C0B2DE}
+  .sd-lbl{font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+  .sd-say .sd-lbl{color:#1F6E70} .sd-agent .sd-lbl{color:#33607D} .sd-bot .sd-lbl{color:#5B4B8A}
+  .sd-saytext{font-size:13px;line-height:1.55;color:#1F4E50;font-style:italic}
+  .sd-concept{font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:none;font-style:normal;
+    background:#fff;color:#B5611F;border:1px solid #E8C9A6;border-radius:5px;padding:1px 6px;margin-left:auto}
+  .sd-do ul{margin:0;padding-left:17px} .sd-do li{font-size:12.5px;line-height:1.5;color:#33536B;margin-bottom:3px}
+  .sd-do .sd-empty{font-size:12px;color:var(--muted);font-style:italic}
+  .sd-ctrl{margin-left:auto;display:inline-flex;gap:4px}
+  .sd-btn{width:24px;height:24px;border:1.5px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;
+    font-size:12px;line-height:1;padding:0;color:var(--muted);font-family:inherit}
+  .sd-btn.ok:hover{border-color:var(--teal);color:var(--teal)}
+  .sd-btn.fix:hover{border-color:var(--orange);color:#C16A23}
+  .sd-btn.ok.on{background:var(--teal);border-color:var(--teal);color:#fff}
+  .sd-btn.fix.on{background:var(--orange);border-color:var(--orange);color:#fff}
+  .sd-edit{width:100%;margin-top:8px;border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;
+    font-family:inherit;font-size:12.5px;line-height:1.5;color:var(--ink);resize:vertical}
+  .sd-edit:focus{outline:2px solid var(--teal-soft);border-color:var(--teal)}
+  .sd-say.blk-ok,.sd-do.blk-ok{box-shadow:inset 3px 0 0 var(--teal)}
+  .sd-say.blk-fix,.sd-do.blk-fix{box-shadow:inset 3px 0 0 var(--orange)}
+  /* editable mode */
+  .editmode{background:#FFFCFA}
+  .editwrap{display:flex;flex-direction:column;gap:12px}
+  .edit-block{display:flex;flex-direction:column;gap:6px}
+  .edit-h{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+  .edit-row{border:1px solid var(--line);border-radius:10px;padding:11px 12px;display:flex;flex-direction:column;gap:9px;background:#fff}
+  .edit-rowhead{font-size:11px;font-weight:800;color:var(--navy);display:flex;align-items:center;justify-content:space-between}
+  .edit-conds,.edit-acts{display:flex;flex-direction:column;gap:5px}
+  .edit-sub{font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--teal)}
+  .edit-item{border:1px solid var(--line);border-radius:10px;padding:10px 11px;display:flex;flex-direction:column;gap:5px;background:#fff}
+  .edit-line{display:flex;align-items:flex-start;gap:6px}
+  .edit-subline{padding-left:14px}
+  .edit-tag{font-size:10px;font-weight:700;color:var(--muted);min-width:38px;padding-top:7px;flex:0 0 auto}
+  .edit-ta,.edit-inp{flex:1;border:1.5px solid var(--line);border-radius:8px;padding:7px 9px;font-family:inherit;
+    font-size:13px;line-height:1.5;color:var(--ink);background:#fff;resize:vertical;min-width:0}
+  .edit-ta:focus,.edit-inp:focus{outline:2px solid var(--teal-soft);border-color:var(--teal)}
+  .edit-del{flex:0 0 auto;width:24px;height:24px;border:none;border-radius:6px;background:#F2E4E0;color:#B5611F;
+    font-size:15px;line-height:1;cursor:pointer;font-weight:700;padding:0;margin-top:3px}
+  .edit-del:hover{background:#EBD2CB}
+  .edit-rowhead .edit-del{width:auto;height:auto;padding:3px 8px;font-size:10px;font-weight:700;background:#F2E4E0}
+  .edit-add{align-self:flex-start;border:1px dashed #B9CBD6;border-radius:7px;background:transparent;color:var(--teal);
+    font-size:11.5px;font-weight:700;padding:5px 11px;cursor:pointer;font-family:inherit}
+  .edit-add:hover{border-color:var(--teal);background:var(--teal-soft)}
+  .edit-addrow{align-self:flex-start;border:none;border-radius:8px;background:var(--navy);color:#fff;
+    font-size:12px;font-weight:700;padding:8px 14px;cursor:pointer;font-family:inherit;margin-top:2px}
+  .edit-addrow:hover{background:#0A3556}
+  .edit-notelbl{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#B5611F;display:block;margin-bottom:5px}
+  .edit-notef{width:100%;min-height:48px;border:1.5px solid var(--line);border-radius:9px;padding:9px 11px;
+    font-family:inherit;font-size:13px;line-height:1.5;resize:vertical}
+
+  /* Check controls */
+  .checks{display:flex;gap:7px;flex-shrink:0}
+  .chk{appearance:none;-webkit-appearance:none;cursor:pointer;font-family:inherit;font-size:11px;font-weight:700;
+    letter-spacing:.03em;padding:6px 11px;border-radius:7px;border:1.5px solid var(--line);background:#fff;color:var(--muted)}
+  .chk:hover{border-color:var(--teal);color:var(--teal)}
+  .chk.ok.on{background:var(--teal);border-color:var(--teal);color:#fff}
+  .chk.fix.on{background:var(--orange);border-color:var(--orange);color:#fff}
+  .statusdot{width:9px;height:9px;border-radius:50%;background:var(--line);flex:0 0 auto;margin-top:5px}
+  .item.done .statusdot{background:var(--teal)} .item.flag .statusdot{background:var(--orange)}
+
+  /* Divergent */
+  .divrow{padding:14px 16px;border-top:1px solid var(--line-soft)}
+  .divrow:first-of-type{border-top:none}
+  .dlbl{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+  .dlbl.std{color:var(--muted)} .dlbl.alt{color:#B5611F}
+  .dshops{font-size:11.5px;color:var(--muted);font-weight:600}
+  .dtext{font-size:12.5px;line-height:1.55;color:#33536B;white-space:pre-wrap;margin-top:4px}
+  .alt-block{background:transparent;border-radius:9px;padding:0;margin-top:9px}
+  .pickrow{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap}
+  .pick{cursor:pointer;font-family:inherit;font-size:11.5px;font-weight:700;padding:7px 13px;border-radius:7px;
+    border:1.5px solid var(--line);background:#fff;color:var(--muted)}
+  .pick:hover{border-color:var(--navy)}
+  .pick.on{background:var(--navy);border-color:var(--navy);color:#fff}
+
+  /* Gap */
+  .gap{border:1px solid #E8C9A6;border-radius:12px;margin-bottom:12px;background:var(--orange-soft);overflow:hidden;
+    break-inside:avoid;page-break-inside:avoid}
+  .gap-top{padding:14px 16px}
+  .gap-topic{font-size:14px;font-weight:700;color:#9A5418;display:flex;align-items:center;gap:8px}
+  .gap-topic .sd-ctrl{margin-left:auto}
+  .gap.blk-ok{box-shadow:inset 3px 0 0 var(--teal)}
+  .gap.blk-fix{box-shadow:inset 3px 0 0 var(--orange)}
+  .vb-gap{display:flex;align-items:center;gap:8px}
+  .vb-gap .sd-ctrl{margin-left:auto}
+  .gap-cond{font-size:12px;color:#8A4A18;font-weight:600;margin-top:3px}
+  .gap-cond b{font-weight:700}
+  .gap-reason{font-size:12.5px;color:#7A4516;margin-top:7px;line-height:1.5}
+  .gap-fill{padding:0 16px 14px}
+  .gap-fill textarea{width:100%;min-height:54px;border:1.5px solid #E8C9A6;border-radius:9px;padding:10px 12px;
+    font-family:inherit;font-size:13px;line-height:1.5;color:var(--ink);background:#fff;resize:vertical}
+  .gap-fill textarea:focus{outline:2px solid #F6D9BB;border-color:var(--orange)}
+  .gap-fill label{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#9A5418;
+    display:block;margin-bottom:5px}
+
+  /* Toolbar */
+  .toolbar{position:sticky;top:0;z-index:20;background:rgba(245,248,250,.92);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:11px 0;margin-bottom:26px}
+  .toolbar-in{max-width:880px;margin:0 auto;padding:0 22px;display:flex;align-items:center;gap:12px}
+  .save-status{font-size:11.5px;font-weight:700;opacity:0;transition:opacity .3s;white-space:nowrap}
+  .save-status.show{opacity:1}
+  .save-status.ok{color:var(--teal)}
+  .save-status.err{color:#C0392B;opacity:1}
+  .progress{flex:1;height:8px;background:var(--line);border-radius:5px;overflow:hidden}
+  .progress span{display:block;height:100%;background:var(--teal);width:0;transition:width .3s}
+  .progress-txt{font-size:12px;font-weight:700;color:var(--navy);white-space:nowrap}
+  .btn{cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:700;padding:8px 15px;border-radius:8px;border:none}
+  .btn.print{background:var(--navy);color:#fff}
+  .btn.print:hover{background:#0A3556}
+  .btn.reset{background:transparent;color:var(--muted);border:1.5px solid var(--line)}
+  .btn.reset:hover{border-color:var(--orange);color:#D97A2B}
+  .btn.export{background:var(--teal);color:#fff}
+  .btn.export:hover{background:#2C7E81}
+  .btn.export2{background:transparent;color:var(--teal);border:1.5px solid var(--teal)}
+  .btn.export2:hover{background:var(--teal-soft)}
+
+  .foot{text-align:center;font-size:11.5px;color:var(--muted);margin-top:40px;padding-top:20px;border-top:1px solid var(--line)}
+
+  /* Print */
+  @media print{
+    body{background:#fff}
+    .toolbar{display:none}
+    .masthead::before{display:none}
+    .item,.gap{box-shadow:none}
+    .chk,.pick{display:none}
+    .item-status-print{display:inline-block !important}
+    .summary{margin-top:18px}
+    .howto{background:#F3F3F3}
+    .gap-fill textarea{border:1px solid #ccc}
+    @page{margin:1.4cm}
+  }
+  .item-status-print{display:none;font-size:11px;font-weight:800;padding:3px 9px;border-radius:6px;margin-left:8px}
+  .item.done .item-status-print{background:var(--teal-soft);color:var(--teal)}
+  .item.flag .item-status-print{background:var(--orange-soft);color:#B5611F}
+</style>
+</head>
+<body>
+<div id="loginGate" class="login-gate" style="display:none">
+  <div class="login-card">
+    <div class="login-logo"><span class="login-smiley">☺</span> <b>memo·offitel</b></div>
+    <div class="login-title">DOCKX Validatiedocument</div>
+    <div class="login-sub">Voer het teamwachtwoord in om samen aan de validatie te werken.</div>
+    <input type="password" id="loginPass" class="login-input" placeholder="Teamwachtwoord" autocomplete="current-password">
+    <div id="loginErr" class="login-err" style="display:none"></div>
+    <button id="loginBtn" class="login-btn">Openen</button>
+  </div>
+</div>
+  <div class="masthead">
+    <div class="mast-in">
+      <div class="brand"><div class="smiley"><i></i><i></i></div>
+        <div><b>memo<em>·offitel</em></b><small>Belscript Cockpit</small></div></div>
+      <div class="mast-tag">DOCK<span>X</span> · VALIDATIE</div>
+      <h1>Validatiedocument belscripts</h1>
+      <div class="mast-sub">Na inspectie van de instructies concluderen we dat de instructies over de vestigingen heen zeer stabiel blijven. Je vindt hieronder de standaard antwoorden, de afwijkende instructies en de ontbrekende instructies — voor aanpassing en/of akkoord.</div>
+    </div>
+  </div>
+
+  <div class="summary" id="summary"></div>
+
+  <div class="toolbar">
+    <div class="toolbar-in">
+      <div class="progress-txt" id="ptxt">0 / 0 nagekeken</div>
+      <div class="progress"><span id="pbar"></span></div>
+      <button class="btn reset" id="resetBtn">Wissen</button>
+      <span class="save-status" id="saveStatus"></span>
+      <button class="btn export" id="exportCleanBtn" title="Schone JSON voor de voicebot-kennisbank">⤓ Kennisbank JSON</button>
+      <button class="btn export2" id="exportFullBtn" title="Volledige JSON: bron + concept + bevestigd">⤓ Volledig JSON</button>
+      <button class="btn print" id="printBtn">Print / PDF + mail</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="howto">
+      <b>Hoe te gebruiken.</b> Elke kaart heeft twee knoppen: <b>Akkoord</b> als de tekst correct is, of <b>Aanpassen</b> als er iets moet veranderen. Bij afwijkende vestigingen kiest u welke versie geldt. Bij ontbrekende stukken vult u het tekstvak in. Klaar? Klik <b>Print / PDF</b> voor een nette versie om te bewaren of door te sturen.
+    </div>
+
+    <div class="sec" id="sec-standard">
+      <div class="sec-head"><span class="sec-no">01</span><span class="sec-title">Standaard — geldt overal</span>
+        <span class="sec-count" id="cnt-std"></span></div>
+      <div class="sec-intro">Deze informatie is identiek voor alle rental-vestigingen. Eén keer nakijken volstaat.</div>
+      <div id="list-standard"></div>
+    </div>
+
+    <div class="sec" id="sec-divergent">
+      <div class="sec-head"><span class="sec-no">02</span><span class="sec-title">Wijkt af per vestiging</span>
+        <span class="sec-count" id="cnt-div"></span></div>
+      <div class="sec-intro">Hier verschilt de inhoud tussen vestigingen. Kies per geval welke versie de juiste is — of dat beide kloppen en het verschil bewust is.</div>
+      <div id="list-divergent"></div>
+    </div>
+
+    <div class="sec" id="sec-specific">
+      <div class="sec-head"><span class="sec-no">03</span><span class="sec-title">Alleen bij specifieke vestigingen</span>
+        <span class="sec-count" id="cnt-spec"></span></div>
+      <div class="sec-intro">Deze onderwerpen bestaan maar bij één of enkele vestigingen — er is geen standaardversie die overal geldt. Kijk per onderwerp na of de instructie klopt.</div>
+      <div id="list-specific"></div>
+    </div>
+
+    <div class="sec" id="sec-gaps">
+      <div class="sec-head"><span class="sec-no">04</span><span class="sec-title">Ontbreekt — in te vullen</span>
+        <span class="sec-count" id="cnt-gap"></span></div>
+      <div class="sec-intro">Voor deze situaties staat geen instructie in de bronfiches. Zolang ze leeg zijn, kan de voicebot er geen antwoord op geven.</div>
+      <div id="list-gaps"></div>
+    </div>
+
+    <div class="foot">Memo·Offitel — Belscript Cockpit · DOCKX validatiedocument · gegenereerd <span id="gendate"></span></div>
+  </div>
+
+<script>
+window.VAL_DATA={"standard":[{"topic":"Ongeval / Panne","text":"HOE NUMMERPLAAT NOTEREN: “1ABC123”\nWat te doen in geval van nieuwe schade of ongeval?\nVraag de klant eerst de aanwezige schade te controleren aan de hand van de 4 foto’s die hij trok en de schadestaat die klant per mail ontving bij vertrek.\nDe klant kan daarna de schade registreren via de knop ‘Schade vastgesteld’. Vraag de klant duidelijke foto’s van de schade te nemen!\nBij een ongeval is het belangrijk ook de schade van de tegenpartij te fotograferen en een Europees Aanrijdingformulier in te vullen of de politie proces-verbaal op te laten maken.\nDEPANNAGE NODIG?\nALTIJD NUMMERPLAAT ALS ONDERWERP PLAATSEN IN MAIL: \"1ABC123\" (geen streepjes of leestekens)\nALTIJD nagaan of het al dan niet een huring via shop of App is!!!!\nNiet dringend: raam gaat niet open, richtingaanwijzer werkt niet, ...\nDringend: lekke band, motorproblemen, technische defecten, ...\nHUUR VIA APP:\nEerst nagaan of het niet de wegrijblokkering is die aangesprongen is! Overloop dan eerst de stapjes hiervoor:\nde sleutel van het contact te halen, de deuren van het voertuig te sluiten en via de app de deuren op slot en van slot te doen.\nHet groene lichtje gaat terug branden en de klant kan weer starten.\n1. Startprobleem: Vraag aan de klant of deze de koppelingspedaal induwt bij het starten.\n2. Vraag aan de klant of er een melding op het dashboard komt.\nIndien dit niet helpt gaan we checken of het een APP-issue is of niet!\nIndien dringend en:\nApp issue:\nTijdens openingsuren: Bellen naar de shop: 2 pogingen, daarna Permanentie App +3238308887 (2 pogingen + cascade)\nBuiten openingsuren: Bellen naar Permanentie App +3238308887 (2 pogingen + cascade)\nIndien Permanentie App onbereikbaar: zie cascade onderaan!\nGeen app issue:\nTijdens openingsuren: Bellen naar de shop: 2 pogingen, daarna Depannage +3238308886\nBuiten openingsuren: Bellen naar Depannage +3238308886 + MAILEN NAAR:\nlegal@dockx.be, denis.jacobs@dockx.be en michiel.claus@dockx.be\nOPGELET Indien geen reactie bij Depannage, bellen naar Joeri Dockx +32476865017\nIndien niet dringend:\nBericht aanmaken in fiche betreffende (opvolg)shop, klant wordt zo snel mogelijk terug gecontacteerd\n\nHUUR NIET VIA APP:\nIndien dit niet helpt en:\nDringend:\nTijdens openingsuren: bellen naar de shop (2 pogingen)\nIndien niet bereikbaar: de Shopmanager contacteren (zie bijlage)\nIndien zij na 2 pogingen niet bereikbaar zijn: bellen naar Depannage +3238308886\nlegal@dockx.be , denis.jacobs@dockx.be en michiel.claus@dockx.be","shops":12,"has_variants":true,"present":16,"std_using":12},{"topic":"Openingsuren","text":"Open ma t/m za 7u30-12u00 en 13u00-18u30\nzon- en feestdagen gesloten","shops":14,"has_variants":true,"present":16,"std_using":14},{"topic":"Algemene voorwaarden","text":"Minimumleeftijd en rijbewijs hangen af van het type voertuig dat u huurt.\nBestuurders van personenwagens zijn minstens 23 jaar en 1 jaar in het bezit van een geldig rijbewijs B. Bestuurders van personenwagens jonger dan 26 jaar betalen € 5 extra op de dag- en weekprijzen met een maximum van € 50.\nBestuurders van luxewagens, SUV’s en sportwagens zijn minstens 25 jaar en 1 jaar in het bezit van een geldig rijbewijs B.\nBestuurders van bestel- en verhuiswagens zijn minstens 21 jaar en 1 jaar in het bezit van een geldig rijbewijs B of BE (volgens voertuigtype).\nBestuurders van vrachtwagens zijn minstens 21 jaar en 1 jaar in het bezit van een geldig rijbewijs C.\nBestuurders van motoren zijn minstens 25 jaar oud en minstens 3 jaar in het bezit van een geldig rijbewijs A.","shops":16,"present":16,"std_using":16,"has_variants":false},{"topic":"Rijbewijs","text":"Rijbewijs A: motor van meer dan 50cc.\nRijbewijs B: voertuig bestemd voor vervoer van personen (max. 8 passagiers en 1 bestuurder);\nvoertuig bestemd voor vervoer van goederen waarvan het gewicht (voertuig + lading) niet meer bedraagt dan 3500 kg;\naanhangwagen tot 750 kg.\nRijbewijs BE: laat toe om aanhangwagen of oplegger met een MTM van ten hoogste 3500 kg te trekken. Indien de aanhangwagen of oplegger een MTM heeft van meer dan 3500 kg en de MTM van het samenstel ten hoogste 12.000 kg bedraagt, is een  rijbewijs C1+E vereist. Voor de houder van een rijbewijs BE behaald vóór 01.05.2013, is het toegestaan om een aanhangwagen of oplegger met een MTM van meer dan 3500 kg te trekken op voorwaarde dat de MTM van het samenstel ten hoogste 12000 kg.\nRijbewijs B+96: laat toe een samenstel te besturen bestaande uit een trekkend voertuig van categorie B en een aanhangwagen met een MTM >750 kg waarvan de MTM van het samenstel groter is dan 3500 kg doch maximum 4250 kg bedraagt.\nRijbewijs C - met geldig rijgeschiktheidsattest: vrachtwagens van meer dan 3500 kg, aanhangwagens tot 750 kg.\nRijbewijs CE: combinatie van een trekkend voertuig van categorie C met een aanhangwagen van meer dan 750 kg.\nRijbewijs D: personenvervoer van meer dan 8 passagiers.\nRijbewijs DE: trekkend voertuig van de categorie D met een aanhangwagen van meer dan 750 kg, aanhangwagen mag niet gebruikt worden voor personenvervoer.\n\nRijgeschiktheidsattest: nodig voor rijbewijzen vanaf categorie C of vervoer van personen; wordt verkregen na medische keuring, attest is 5 jaar geldig. Bij een verlopen rijgeschiktheidsattest vervalt ook de geldigheid van het rijbewijs C.\nDigitale bestuurderskaart: bestuurders van vrachtwagens rijbewijs C, CE, D en DE moeten in het bezit zijn van een digitale bestuurderskaart.\nOp www.digitach.be(\"file:///C:\\\\Users\\\\elias.vercauteren\\\\Documents\\\\www.digitach.be\") vindt u een aanvraagformulier voor een digitale bestuurderskaart.\nEen bijkomende bestuurder van een personenwagen of van een bestel- en verhuiswagen betaalt € 15 extra per bestuurder.\nAls u gereserveerd hebt en alsnog de reservatie ongedaan wenst te maken, contactuur uw shop om de annulatie te regelen.","shops":16,"present":16,"std_using":16,"has_variants":false},{"topic":"Afhalen voertuig","text":"Bij het afhalen van het voertuig moet u de volgende documenten voorleggen:\neen geldige Belgische identiteitskaart;\neen geldig Europees rijbewijs;\neen kredietkaart, bankkaart.","shops":16,"present":16,"std_using":16,"has_variants":false},{"topic":"Voertuig binnenbrengen","text":"U brengt het voertuig binnen op de dag dat het huurcontract afloopt, vóór 7.30 uur ’s morgens, tenzij u een ander tijdstip heeft afgesproken.\nHuurt u een voertuig tot en met zaterdag, dan brengt u het op zaterdag binnen vóór 17.30 uur.\nHuurt u een voertuig tot en met zondag, dan brengt u het op maandag terug, vóór 7.30 uur.\n\nHet voertuig buiten de openingsuren terugbrengen is mogelijk. U zet het huurvoertuig af op de parking van de Dockx Service Shop waar u het heeft afgehaald.\nU sluit het voertuig volledig af en deponeert de autosleutels in de sleutelbus.\nWenst u het voertuig binnen te brengen in een andere Service Shop dan is dat vooraf af te spreken in de Shop waar u het voertuig afhaalt. U betaalt een supplement van € 50.\nU dient het voertuig proper - langs binnen én buiten - en volgens de afspraken op het huurcontract binnen te brengen.\nLukt het niet om het voertuig proper binnen te brengen, dan rekenen wij een extra kost aan voor het reinigen van het voertuig.","shops":16,"present":16,"std_using":16,"has_variants":false},{"topic":"Brandstof","text":"U vertrekt altijd met een volle brandstoftank en brengt het voertuig met een volle tank weer binnen.\nLukt dat niet, dan tanken wij het voertuig voor u vol aan onze pomp.\nDe prijs van deze tankbeurt (brandstof tegen dagprijs) komt dan bij op uw eindfactuur.","shops":16,"present":16,"std_using":16,"has_variants":false},{"topic":"Betaling","text":"U brengt het voertuig tijdens de kantooruren binnen.\nDan maken we meteen de afrekening die we met u overlopen en u betaalt onmiddellijk.\nU zet het voertuig af buiten de kantooruren.\nDan vragen we u om binnen de drie dagen naar de Dockx Service Shop te gaan waar u het voertuig heeft afgezet voor de afrekening en de betaling.","shops":16,"present":16,"std_using":16,"has_variants":false},{"topic":"Huurperiode verlengen","text":"Het voertuig verlengen kan online via My Dockx Rental of schriftelijk per brief of e-mail of bij de Dockx Service Shop waar u het voertuig heeft afgehaald( telefonisch verlengen is niet mogelijk).\nDe waarborg wordt aangepast en u krijgt een nieuw huurcontract.\nZonder dit contract bent u niet gedekt door de verzekering.\nMEMO kan GEEN verlengingen doen, enkel noteren zodanig de shop contact kan nemen met de klant.","shops":16,"present":16,"std_using":16,"has_variants":false},{"topic":"Reservatie na 48u","text":"Memo kan en mag geen reservatie boeken\nAlles noteren en aan de klant laten weten dat de shop hen zal contacteren.","shops":13,"present":13,"std_using":13,"has_variants":false},{"topic":"Annulatie","text":"Bij annulaties minder dan 48uur dient er wel een kost aangerekend te worden.\nAan de klant zeggen we dat we het doorgeven aan de shop, wij kunnen hier namelijk NIET over beslissen.\nAls het binnen 48u van de reservatie is, kan het zijn dat er een annulatiekost wordt doorgerekend.\nHiervoor zullen de collega’s van Dockx Rental met hen contact opnemen.\nWij noteren gewoon alle informatie zodat de shop het nodige kan doen.","shops":16,"present":16,"std_using":16,"has_variants":false},{"topic":"Dringende reservatie (ma-vr)","text":"Huring personenwagens is terug mogelijk voor particulieren.\nDit is enkel mogelijk via kredietkaart, mits de houder van de kredietkaart aanwezig is!\nDus X kan niet huren met kredietkaart van Y tenzij Y zelf ook aanwezig is!!","shops":15,"has_variants":true,"present":16,"std_using":15},{"topic":"Dringende reservatie (weekend)","text":"Huring personenwagens is terug mogelijk voor particulieren.\nDit is enkel mogelijk via kredietkaart, mits de houder van de kredietkaart aanwezig is!\nDus X kan niet huren met kredietkaart van Y tenzij Y zelf ook aanwezig is!!","shops":15,"has_variants":true,"present":16,"std_using":15},{"topic":"Zendingen","text":"Enkel pakjesdienst voor DHL Express worden bij Dockx behandeld.\nVraag/info/opmerking noteren en de shop zal de klant contacteren.","shops":16,"present":16,"std_using":16,"has_variants":false},{"topic":"Proces-verbaal / Klacht","text":"Klant dient zelf contact op te nemen met de Politie","shops":16,"present":16,"std_using":16,"has_variants":false},{"topic":"Oproep politie","text":"Tijdens kantooruren\nbellen naar de shop (2 pogingen, nadien shopmanager)\nshopmanager contacteren (zie bijlage), indien geen gehoor de volgende in cascade bellen.\n\nBuiten de kantooruren / feestdagen\nIndien dringend => Wacht Depannage contacteren: bel ENKEL naar +3238308886\n+ MAILEN NAAR: dirk.moons@dockx.be ; denis.jacobs@dockx.be ; michiel.claus@dockx.be\nNUMMERPLAAT IN ONDERWERP ZETTEN: 1ABC123 (geen streepjes of leestekens)\n\nIndien NIET dringend => Alle info noteren zodat de shop kan opvolgen eerstdaags.","shops":16,"present":16,"std_using":16,"has_variants":false},{"topic":"Dockx App","text":"Zie instructies Dockx App 2.0 bij twijfel.\n\nIndien men belt voor een PUP - dan noteer je in de fiche van de juiste opvolgshop!\n\nWanneer er naar een shop/PUP wordt gebeld en het gaat over een vraag/probleem specifiek over de app:\nIndien wij eerst naar de shop bellen, geen gehoor krijgen en naar de wachtdienst bellen dan noteren we dit in de fiche van de App!\nJe kan het bericht gewoon copy pasten en dan bij Dockx App 2.0 de call reason \"oproep app via shop\" selecteren en het bericht daar plakken.\n\nWanneer er naar een shop/PUP wordt gebeld voor een algemene vraag waarbij er dus niet naar de wachtdienst gebeld wordt,\ndan mag je het bericht gewoon in de fiche van de betreffende shop noteren.","shops":16,"present":16,"std_using":16,"has_variants":false},{"topic":"Code poort","text":"Wij hebben GEEN codes van de poorten.\nWij kunnen/mogen hier ook niemand voor bellen.\nKlanten MOETEN op hun contract kijken onder “MEMO”.\nOm veiligheidsredenen mogen/kunnen deze niet telefonisch doorgegeven worden per telefoon na de uren.\nKleine nuance: indien men vastzit OP de parking en men kan er niet af maken we natuurlijk een uitzondering!\nEnkel in dit geval kan je de escalatie van de shop in bijlage contacteren.","shops":15,"present":15,"std_using":15,"has_variants":false},{"topic":"Belt zelf terug","text":"Opslaan als behandeld en status \"voltooid\" (laatste vakje boven \"Free text\")","shops":16,"present":16,"std_using":16,"has_variants":false},{"topic":"Huren via de shop","text":"Huring personenwagens is terug mogelijk voor particulieren VIA de shop.\nDit is wel enkel mogelijk via kredietkaart, mits de houder van de kredietkaart aanwezig is!\nDus X kan niet huren met kredietkaart van Y tenzij Y zelf ook aanwezig is!!","shops":16,"present":16,"std_using":16,"has_variants":false},{"topic":"Laadkleppen","text":"Info laadkleppen: via de QR-code aan de zijkant van de wagen kan men een link volgen naar een gebruikshandleiding met filmpje.\nVoor de bovenklep open te duwen mag/moet men wat kracht zetten, deze zijn soms heel stroef en moeilijk te openen.\nIndien hier toch problemen met zijn is dit voor Depannage, niet voor App wachtdienst!","shops":16,"present":16,"std_using":16,"has_variants":false}],"divergent":[{"topic":"Ongeval / Panne","standard":"HOE NUMMERPLAAT NOTEREN: “1ABC123”\nWat te doen in geval van nieuwe schade of ongeval?\nVraag de klant eerst de aanwezige schade te controleren aan de hand van de 4 foto’s die hij trok en de schadestaat die klant per mail ontving bij vertrek.\nDe klant kan daarna de schade registreren via de knop ‘Schade vastgesteld’. Vraag de klant duidelijke foto’s van de schade te nemen!\nBij een ongeval is het belangrijk ook de schade van de tegenpartij te fotograferen en een Europees Aanrijdingformulier in te vullen of de politie proces-verbaal op te laten maken.\nDEPANNAGE NODIG?\nALTIJD NUMMERPLAAT ALS ONDERWERP PLAATSEN IN MAIL: \"1ABC123\" (geen streepjes of leestekens)\nALTIJD nagaan of het al dan niet een huring via shop of App is!!!!\nNiet dringend: raam gaat niet open, richtingaanwijzer werkt niet, ...\nDringend: lekke band, motorproblemen, technische defecten, ...\nHUUR VIA APP:\nEerst nagaan of het niet de wegrijblokkering is die aangesprongen is! Overloop dan eerst de stapjes hiervoor:\nde sleutel van het contact te halen, de deuren van het voertuig te sluiten en via de app de deuren op slot en van slot te doen.\nHet groene lichtje gaat terug branden en de klant kan weer starten.\n1. Startprobleem: Vraag aan de klant of deze de koppelingspedaal induwt bij het starten.\n2. Vraag aan de klant of er een melding op het dashboard komt.\nIndien dit niet helpt gaan we checken of het een APP-issue is of niet!\nIndien dringend en:\nApp issue:\nTijdens openingsuren: Bellen naar de shop: 2 pogingen, daarna Permanentie App +3238308887 (2 pogingen + cascade)\nBuiten openingsuren: Bellen naar Permanentie App +3238308887 (2 pogingen + cascade)\nIndien Permanentie App onbereikbaar: zie cascade onderaan!\nGeen app issue:\nTijdens openingsuren: Bellen naar de shop: 2 pogingen, daarna Depannage +3238308886\nBuiten openingsuren: Bellen naar Depannage +3238308886 + MAILEN NAAR:\nlegal@dockx.be, denis.jacobs@dockx.be en michiel.claus@dockx.be\nOPGELET Indien geen reactie bij Depannage, bellen naar Joeri Dockx +32476865017\nIndien niet dringend:\nBericht aanmaken in fiche betreffende (opvolg)shop, klant wordt zo snel mogelijk terug gecontacteerd\n\nHUUR NIET VIA APP:\nIndien dit niet helpt en:\nDringend:\nTijdens openingsuren: bellen naar de shop (2 pogingen)\nIndien niet bereikbaar: de Shopmanager contacteren (zie bijlage)\nIndien zij na 2 pogingen niet bereikbaar zijn: bellen naar Depannage +3238308886\nlegal@dockx.be , denis.jacobs@dockx.be en michiel.claus@dockx.be","std_shops":12,"total":16,"variants":[{"shops":["7402","7403","7405"],"shopnames":["DOCKX RENTAL DEURNE","DOCKX RENTAL MECHELEN","DOCKX RENTAL VORST"],"text":"HOE NUMMERPLAAT NOTEREN: “1ABC123”\nDEPANNAGE NODIG?\nALTIJD NUMMERPLAAT ALS ONDERWERP PLAATSEN IN MAIL: \"1ABC123\" (geen streepjes of leestekens)\nALTIJD nagaan of het al dan niet een huring via shop of App is!!!!\nNiet dringend: raam gaat niet open, richtingaanwijzer werkt niet, ...\nDringend: lekke band, motorproblemen, technische defecten, ...\nHUUR VIA APP:\nEerst nagaan of het niet de wegrijblokkering is die aangesprongen is! Overloop dan eerst de stapjes hiervoor:\nde sleutel van het contact te halen, de deuren van het voertuig te sluiten en via de app de deuren op slot en van slot te doen.\nHet groene lichtje gaat terug branden en de klant kan weer starten.\n1. Startprobleem: Vraag aan de klant of deze de koppelingspedaal induwt bij het starten.\n2. Vraag aan de klant of er een melding op het dashboard komt.\nIndien dit niet helpt gaan we checken of het een APP-issue is of niet!\nIndien dringend en:\nApp issue:\nTijdens openingsuren: Bellen naar de shop: 2 pogingen, daarna Permanentie App +3238308887 (2 pogingen + cascade)\nBuiten openingsuren: Bellen naar Permanentie App +3238308887 (2 pogingen + cascade)\nIndien Permanentie App onbereikbaar: zie cascade onderaan!\nGeen app issue:\nTijdens openingsuren: Bellen naar de shop: 2 pogingen, daarna Depannage +3238308886\nBuiten openingsuren: Bellen naar Depannage +3238308886 + MAILEN NAAR:\nlegal@dockx.be, denis.jacobs@dockx.be en michiel.claus@dockx.be\nOPGELET Indien geen reactie bij Depannage, bellen naar Joeri Dockx +32476865017\nIndien niet dringend:\nBericht aanmaken in fiche betreffende (opvolg)shop, klant wordt zo snel mogelijk terug gecontacteerd\n\nHUUR NIET VIA APP:\nIndien dit niet helpt en:\nDringend:\nTijdens openingsuren: bellen naar de shop (2 pogingen)\nIndien niet bereikbaar: de Shopmanager contacteren (zie bijlage)\nIndien zij na 2 pogingen niet bereikbaar zijn: bellen naar Depannage +3238308886\nlegal@dockx.be , denis.jacobs@dockx.be en michiel.claus@dockx.be"},{"shops":["7401"],"shopnames":["DOCKX RENTAL WILRIJK"],"text":"Huring via shop of App = andere instructie!\n\nALTIJD NUMMERPLAAT ALS ONDERWERP PLAATSEN IN MAIL: \"1ABC123\" (geen streepjes of leestekens)\nALTIJD nagaan of het al dan niet een huring via shop of App is!!!!\nNiet dringend: raam gaat niet open, richtingaanwijzer werkt niet, ...\nDringend: lekke band, motorproblemen, technische defecten, ...\nHUUR VIA APP:\nEerst nagaan of het niet de wegrijblokkering is die aangesprongen is! Overloop dan eerst de stapjes hiervoor:\nde sleutel van het contact te halen, de deuren van het voertuig te sluiten en via de app de deuren op slot en van slot te doen.\nHet groene lichtje gaat terug branden en de klant kan weer starten.\n1. Startprobleem: Vraag aan de klant of deze de koppelingspedaal induwt bij het starten.\n2. Vraag aan de klant of er een melding op het dashboard komt.\nIndien dit niet helpt gaan we checken of het een APP-issue is of niet!\nIndien dringend en:\nApp issue:\nTijdens openingsuren: Bellen naar de shop: 2 pogingen, daarna Permanentie App +3238308887 (2 pogingen + cascade)\nBuiten openingsuren: Bellen naar Permanentie App +3238308887 (2 pogingen + cascade)\nIndien Permanentie App onbereikbaar: zie cascade onderaan!\nGeen app issue:\nTijdens openingsuren: Bellen naar de shop: 2 pogingen, daarna Depannage +3238308886\nBuiten openingsuren: Bellen naar Depannage +3238308886 + MAILEN NAAR:\nlegal@dockx.be, denis.jacobs@dockx.be en michiel.claus@dockx.be\nOPGELET Indien geen reactie bij Depannage, bellen naar Joeri Dockx +32476865017\nIndien niet dringend:\nBericht aanmaken in fiche betreffende (opvolg)shop, klant wordt zo snel mogelijk terug gecontacteerd\n\nHUUR NIET VIA APP:\nIndien dit niet helpt en:\nDringend:\nTijdens openingsuren: bellen naar de shop (2 pogingen)\nIndien niet bereikbaar: de Shopmanager contacteren (zie bijlage)\nIndien zij na 2 pogingen niet bereikbaar zijn: bellen naar Depannage +3238308886\nlegal@dockx.be , denis.jacobs@dockx.be en michiel.claus@dockx.be"}]},{"topic":"Openingsuren","standard":"Open ma t/m za 7u30-12u00 en 13u00-18u30\nzon- en feestdagen gesloten","std_shops":14,"total":16,"variants":[{"shops":["7401"],"shopnames":["DOCKX RENTAL WILRIJK"],"text":"OPEN van Ma tot en met Za 7u30 - 12u en 13u00 - 18u30\nzon- en feestdagen gesloten"},{"shops":["7416"],"shopnames":["DOCKX RENTAL LUIK"],"text":"Open ma tem za 07.30u-12.00u en 13.00u-18.30u\nzon- en feestdagen gesloten"}]},{"topic":"Dringende reservatie (ma-vr)","standard":"Huring personenwagens is terug mogelijk voor particulieren.\nDit is enkel mogelijk via kredietkaart, mits de houder van de kredietkaart aanwezig is!\nDus X kan niet huren met kredietkaart van Y tenzij Y zelf ook aanwezig is!!","std_shops":15,"total":16,"variants":[{"shops":["7434"],"shopnames":["DOCKX RENTAL CHARLEROI"],"text":"Berichten steeds in het FRANS noteren\n\nHuring personenwagens is terug mogelijk voor particulieren.\nDit is enkel mogelijk via kredietkaart, mits de houder van de kredietkaart aanwezig is!\nDus X kan niet huren met kredietkaart van Y tenzij Y zelf ook aanwezig is!!"}]},{"topic":"Dringende reservatie (weekend)","standard":"Huring personenwagens is terug mogelijk voor particulieren.\nDit is enkel mogelijk via kredietkaart, mits de houder van de kredietkaart aanwezig is!\nDus X kan niet huren met kredietkaart van Y tenzij Y zelf ook aanwezig is!!","std_shops":15,"total":16,"variants":[{"shops":["7434"],"shopnames":["DOCKX RENTAL CHARLEROI"],"text":"Berichten steeds in het FRANS noteren\n\nHuring personenwagens is terug mogelijk voor particulieren.\nDit is enkel mogelijk via kredietkaart, mits de houder van de kredietkaart aanwezig is!\nDus X kan niet huren met kredietkaart van Y tenzij Y zelf ook aanwezig is!!"}]}],"gaps":[{"topic":"Ongeval / Panne","condition":"Niet via de App → Dringend → Buiten openingsuren","reason":"De bron beschrijft voor 'niet via app + dringend' alleen 'tijdens openingsuren'. Buiten openingsuren ontbreekt."},{"topic":"Ongeval / Panne","condition":"Niet via de App → Niet dringend","reason":"De bron geeft geen instructie voor 'niet via app + niet dringend'."},{"topic":"Annulatie","condition":"Meer dan 48u","reason":"De bron benoemt alleen <48u. Wat geldt bij >48u (kosteloos?) staat er niet."},{"topic":"Zendingen","condition":"Andere dienst","reason":"De bron zegt 'enkel DHL Express'. Wat te doen bij andere diensten staat er niet."},{"topic":"Instructies & praktisch gebruik","condition":"Klant vraagt naar het laden van een elektrische wagen (laadbeleid en kosten)","reason":"De bronfiches beschrijven enkel brandstof (volle tank in, volle tank uit). Over het laden van een elektrische wagen — laadbeleid en eventuele kosten — staat niets in de bron."},{"topic":"Verloren voorwerpen","condition":"Klant heeft iets vergeten in de wagen en vraagt om na te kijken","reason":"De bronfiches bevatten geen onderwerp 'verloren voorwerpen'. Wat de agent of bot moet doen wanneer een klant iets achterlaat in een huurwagen, staat nergens beschreven."}],"meta":{"rental_shops":16,"n_standard":21,"n_divergent":4,"n_gaps":6,"n_specific":3},"logic":{"trees":{"Ongeval / Panne":{"intro":["Nummerplaat noteren als \"1ABC123\" (geen streepjes/leestekens) — ook als onderwerp van de mail.","Bij schade/ongeval: klant controleert schade via de 4 foto's + schadestaat, registreert via knop 'Schade vastgesteld', neemt duidelijke foto's. Bij ongeval ook tegenpartij fotograferen + Europees aanrijdingsformulier of politie-PV."],"start":"q_app","questions":{"q_app":{"vraag":"Huurt de klant via de App of niet?","opties":[{"label":"Via de App","next":"q_app_dringend"},{"label":"Niet via de App","next":"q_napp_dringend"}]},"q_app_dringend":{"vraag":"Is het dringend? (dringend = lekke band, motor, technisch defect — niet dringend = raam, knipperlicht)","hint":"Eerst proberen: wegrijblokkering? Sleutel uit contact, deuren sluiten, via app op slot en van slot → groen lichtje brandt. Dan: koppelingspedaal induwen bij starten? Melding op dashboard?","opties":[{"label":"Dringend","next":"q_app_issue"},{"label":"Niet dringend","action":["Bericht aanmaken in de fiche van de (opvolg)shop. De klant wordt zo snel mogelijk teruggebeld."]}]},"q_app_issue":{"vraag":"Is het een App-issue of niet?","opties":[{"label":"App-issue","next":"q_app_issue_uren"},{"label":"Geen app-issue","next":"q_app_noissue_uren"}]},"q_app_issue_uren":{"vraag":"Tijdens of buiten de openingsuren?","opties":[{"label":"Tijdens openingsuren","action":["Bel de shop (2 pogingen).","Daarna Permanentie App +3238308887 (2 pogingen + cascade).","Onbereikbaar? Zie cascade onderaan de fiche."]},{"label":"Buiten openingsuren","action":["Bel Permanentie App +3238308887 (2 pogingen + cascade).","Onbereikbaar? Zie cascade onderaan de fiche."]}]},"q_app_noissue_uren":{"vraag":"Tijdens of buiten de openingsuren?","opties":[{"label":"Tijdens openingsuren","action":["Bel de shop (2 pogingen).","Daarna Depannage +3238308886."]},{"label":"Buiten openingsuren","action":["Bel Depannage +3238308886.","Mail naar: legal@dockx.be, denis.jacobs@dockx.be, michiel.claus@dockx.be.","Geen reactie? Bel Joeri Dockx +32476865017."]}]},"q_napp_dringend":{"vraag":"Is het dringend? (dringend = lekke band, motor, technisch defect — niet dringend = raam, knipperlicht)","hint":"Eerst proberen: koppelingspedaal induwen bij starten? Melding op dashboard?","opties":[{"label":"Dringend","next":"q_napp_uren"},{"label":"Niet dringend","action":[],"gap":true,"gap_reason":"De bron geeft geen instructie voor 'niet via app + niet dringend'."}]},"q_napp_uren":{"vraag":"Tijdens of buiten de openingsuren?","opties":[{"label":"Tijdens openingsuren","action":["Bel de shop (2 pogingen).","Niet bereikbaar? Bel de shopmanager (zie bijlage).","Na 2 pogingen niet bereikbaar? Bel Depannage +3238308886.","Mail naar: legal@dockx.be, denis.jacobs@dockx.be, michiel.claus@dockx.be."]},{"label":"Buiten openingsuren","action":[],"gap":true,"gap_reason":"De bron beschrijft voor 'niet via app + dringend' alleen 'tijdens openingsuren'. Buiten openingsuren ontbreekt."}]}}},"Oproep politie":{"intro":["Nummerplaat in onderwerp zetten: 1ABC123 (geen streepjes/leestekens)."],"start":"q_uren","questions":{"q_uren":{"vraag":"Tijdens of buiten de kantooruren/feestdagen?","opties":[{"label":"Tijdens kantooruren","action":["Bel de shop (2 pogingen), nadien de shopmanager (zie bijlage).","Geen gehoor? Bel de volgende in cascade."]},{"label":"Buiten kantooruren / feestdagen","next":"q_dringend"}]},"q_dringend":{"vraag":"Is het dringend?","opties":[{"label":"Dringend","action":["Wacht Depannage: bel ENKEL +3238308886.","Mail naar: dirk.moons@dockx.be, denis.jacobs@dockx.be, michiel.claus@dockx.be."]},{"label":"Niet dringend","action":["Alle info noteren zodat de shop eerstdaags kan opvolgen."]}]}}},"Betaling":{"intro":[],"start":"q_uren","questions":{"q_uren":{"vraag":"Wanneer brengt de klant het voertuig binnen?","opties":[{"label":"Tijdens kantooruren","action":["De afrekening wordt meteen overlopen.","De klant betaalt onmiddellijk."]},{"label":"Buiten kantooruren","action":["De klant gaat binnen 3 dagen naar de Service Shop van afzetting voor afrekening en betaling."]}]}}},"Dockx App":{"intro":["Bij twijfel: zie instructies Dockx App 2.0."],"start":"q_type","questions":{"q_type":{"vraag":"Waarover gaat de oproep?","opties":[{"label":"Een PUP (Pick-Up Point)","action":["Noteren in de fiche van de juiste opvolgshop."]},{"label":"App-vraag, shop gebeld → wachtdienst","action":["Noteren in de fiche van de App.","Bericht copy-pasten en bij Dockx App 2.0 call reason 'oproep app via shop' selecteren."]},{"label":"Algemene vraag, geen wachtdienst","action":["Bericht noteren in de fiche van de betreffende shop."]}]}}},"Annulatie":{"intro":["Memo beslist niet over annulatiekosten. Aan de klant zeggen: we geven het door aan de shop, Dockx Rental neemt contact op."],"start":"q_termijn","questions":{"q_termijn":{"vraag":"Hoe lang vóór de reservatie annuleert de klant?","opties":[{"label":"Minder dan 48u","action":["Er kan een annulatiekost worden aangerekend.","Alle info noteren; Dockx Rental contacteert de klant."]},{"label":"Meer dan 48u","action":[],"gap":true,"gap_reason":"De bron benoemt alleen <48u. Wat geldt bij >48u (kosteloos?) staat er niet."}]}}},"Zendingen":{"intro":[],"start":"q_dienst","questions":{"q_dienst":{"vraag":"Welke pakjesdienst?","opties":[{"label":"DHL Express","action":["Wordt bij Dockx behandeld.","Vraag/info/opmerking noteren; de shop contacteert de klant."]},{"label":"Andere dienst","action":[],"gap":true,"gap_reason":"De bron zegt 'enkel DHL Express'. Wat te doen bij andere diensten staat er niet."}]}}}},"direct":{"Reservatie na 48u":["Memo kan/mag geen reservatie boeken.","Alles noteren en de klant laten weten dat de shop hen contacteert."],"Proces-verbaal / Klacht":["De klant neemt zelf contact op met de politie."],"Code poort":["Memo heeft GEEN poortcodes en mag niemand bellen.","Klant moet op het contract kijken onder 'MEMO'.","Om veiligheidsredenen niet telefonisch doorgeven na de uren.","Uitzondering — klant zit vast OP de parking: escalatie van de shop in bijlage contacteren."],"Belt zelf terug":["Opslaan als behandeld, status 'voltooid' (laatste vakje boven 'Free text')."],"Huurperiode verlengen":["Verlengen kan online via My Dockx Rental, schriftelijk of bij de shop — NIET telefonisch.","Waarborg wordt aangepast, nieuw contract volgt (zonder contract geen verzekering).","MEMO kan GEEN verlengingen doen — enkel noteren zodat de shop contact neemt."],"Huren via de shop":["Huring personenwagens is terug mogelijk voor particulieren VIA de shop.","Dit is wel enkel mogelijk via kredietkaart, mits de houder van de kredietkaart aanwezig is!","Dus X kan niet huren met kredietkaart van Y tenzij Y zelf ook aanwezig is!!"],"Taal & werkwijze":["Berichten steeds in het Frans noteren! Messages en français!","Steeds vragen of het voor Charleroi of Luik/Liège is en dan de juiste klantenfiche gebruiken!"]},"info":["Openingsuren","Rijbewijs","Algemene voorwaarden","Afhalen voertuig","Voertuig binnenbrengen","Brandstof","Bericht","Dringende reservatie (ma-vr)","Dringende reservatie (weekend)","Laadkleppen"]},"info_struct":{"Openingsuren":{"intro":[],"items":[{"label":"Openingsuren","body":"Open ma t/m za 7u30-12u00 en 13u00-18u30.","sub":[]},{"label":"Gesloten","body":"Zon- en feestdagen.","sub":[]}]},"Algemene voorwaarden":{"intro":["Minimumleeftijd en rijbewijs hangen af van het type voertuig dat u huurt."],"items":[{"label":"Personenwagens","body":"Minstens 23 jaar en 1 jaar in het bezit van een geldig rijbewijs B.","sub":["Bestuurders jonger dan 26 jaar betalen € 5 extra op de dag- en weekprijzen, met een maximum van € 50."]},{"label":"Luxewagens, SUV's en sportwagens","body":"Minstens 25 jaar en 1 jaar in het bezit van een geldig rijbewijs B.","sub":[]},{"label":"Bestel- en verhuiswagens","body":"Minstens 21 jaar en 1 jaar in het bezit van een geldig rijbewijs B of BE (volgens voertuigtype).","sub":[]},{"label":"Vrachtwagens","body":"Minstens 21 jaar en 1 jaar in het bezit van een geldig rijbewijs C.","sub":[]},{"label":"Motoren","body":"Minstens 25 jaar en minstens 3 jaar in het bezit van een geldig rijbewijs A.","sub":[]}]},"Rijbewijs":{"intro":[],"items":[{"label":"Rijbewijs A","body":"Motor van meer dan 50cc.","sub":[]},{"label":"Rijbewijs B","body":"","sub":["Voertuig voor vervoer van personen (max. 8 passagiers en 1 bestuurder).","Voertuig voor vervoer van goederen waarvan het gewicht (voertuig + lading) niet meer bedraagt dan 3500 kg.","Aanhangwagen tot 750 kg."]},{"label":"Rijbewijs BE","body":"Laat toe om een aanhangwagen of oplegger met een MTM van ten hoogste 3500 kg te trekken.","sub":["Heeft de aanhangwagen of oplegger een MTM van meer dan 3500 kg en de MTM van het samenstel ten hoogste 12.000 kg, dan is een rijbewijs C1+E vereist.","Houder van een rijbewijs BE behaald vóór 01.05.2013: mag een aanhangwagen of oplegger met een MTM van meer dan 3500 kg trekken op voorwaarde dat de MTM van het samenstel ten hoogste 12.000 kg is."]},{"label":"Rijbewijs B+96","body":"Laat toe een samenstel te besturen van een trekkend voertuig categorie B en een aanhangwagen met een MTM > 750 kg, waarbij de MTM van het samenstel groter is dan 3500 kg doch maximum 4250 kg bedraagt.","sub":[]},{"label":"Rijbewijs C","body":"Met geldig rijgeschiktheidsattest: vrachtwagens van meer dan 3500 kg, aanhangwagens tot 750 kg.","sub":[]},{"label":"Rijbewijs CE","body":"Combinatie van een trekkend voertuig categorie C met een aanhangwagen van meer dan 750 kg.","sub":[]},{"label":"Rijbewijs D","body":"Personenvervoer van meer dan 8 passagiers.","sub":[]},{"label":"Rijbewijs DE","body":"Trekkend voertuig categorie D met een aanhangwagen van meer dan 750 kg. De aanhangwagen mag niet gebruikt worden voor personenvervoer.","sub":[]},{"label":"Rijgeschiktheidsattest","body":"Nodig voor rijbewijzen vanaf categorie C of voor vervoer van personen. Wordt verkregen na medische keuring en is 5 jaar geldig.","sub":["Bij een verlopen rijgeschiktheidsattest vervalt ook de geldigheid van het rijbewijs C."]},{"label":"Digitale bestuurderskaart","body":"Bestuurders van vrachtwagens met rijbewijs C, CE, D en DE moeten in het bezit zijn van een digitale bestuurderskaart.","sub":["Op www.digitach.be vindt u een aanvraagformulier."]},{"label":"Bijkomende bestuurder","body":"Een bijkomende bestuurder van een personenwagen of van een bestel- en verhuiswagen betaalt € 15 extra per bestuurder.","sub":[]},{"label":"Annulatie","body":"Hebt u gereserveerd en wilt u toch annuleren, contacteer dan uw shop om de annulatie te regelen.","sub":[]}]},"Afhalen voertuig":{"intro":["Bij het afhalen van het voertuig moet u de volgende documenten voorleggen:"],"items":[{"label":"","body":"Een geldige Belgische identiteitskaart.","sub":[]},{"label":"","body":"Een geldig Europees rijbewijs.","sub":[]},{"label":"","body":"Een kredietkaart of bankkaart.","sub":[]}]},"Voertuig binnenbrengen":{"intro":[],"items":[{"label":"Tijdstip","body":"U brengt het voertuig binnen op de dag dat het huurcontract afloopt, vóór 7u30 's morgens, tenzij u een ander tijdstip heeft afgesproken.","sub":[]},{"label":"Huur tot en met zaterdag","body":"Breng het voertuig op zaterdag binnen vóór 17u30.","sub":[]},{"label":"Huur tot en met zondag","body":"Breng het voertuig op maandag terug, vóór 7u30.","sub":[]},{"label":"Buiten de openingsuren","body":"U zet het huurvoertuig af op de parking van de Dockx Service Shop waar u het heeft afgehaald, sluit het volledig af en deponeert de sleutels in de sleutelbus.","sub":[]},{"label":"Andere Service Shop","body":"Wilt u het voertuig in een andere Service Shop binnenbrengen, spreek dat dan vooraf af in de shop waar u het ophaalt. U betaalt een supplement van € 50.","sub":[]},{"label":"Proper inleveren","body":"U brengt het voertuig proper binnen — langs binnen én buiten — en volgens de afspraken op het huurcontract.","sub":["Lukt dat niet, dan rekenen wij een extra kost aan voor het reinigen van het voertuig."]}]},"Brandstof":{"intro":[],"items":[{"label":"Volle tank","body":"U vertrekt altijd met een volle brandstoftank en brengt het voertuig met een volle tank weer binnen.","sub":[]},{"label":"Niet volgetankt","body":"Lukt dat niet, dan tanken wij het voertuig voor u vol aan onze pomp.","sub":["De prijs van deze tankbeurt (brandstof tegen dagprijs) komt bij op uw eindfactuur."]}]},"Dringende reservatie (ma-vr)":{"intro":[],"items":[{"label":"Wie","body":"Huur van personenwagens is terug mogelijk voor particulieren.","sub":[]},{"label":"Betaalwijze","body":"Enkel mogelijk via kredietkaart, mits de houder van de kredietkaart aanwezig is.","sub":["Iemand kan dus niet huren met de kredietkaart van een ander, tenzij die ander ook aanwezig is."]}]},"Dringende reservatie (weekend)":{"intro":[],"items":[{"label":"Wie","body":"Huur van personenwagens is terug mogelijk voor particulieren.","sub":[]},{"label":"Betaalwijze","body":"Enkel mogelijk via kredietkaart, mits de houder van de kredietkaart aanwezig is.","sub":["Iemand kan dus niet huren met de kredietkaart van een ander, tenzij die ander ook aanwezig is."]}]},"Laadkleppen":{"intro":[],"items":[{"label":"Handleiding","body":"Via de QR-code aan de zijkant van de wagen kan men een link volgen naar een gebruikshandleiding met filmpje.","sub":[]},{"label":"Bovenklep","body":"Voor de bovenklep open te duwen moet men wat kracht zetten; deze zijn soms heel stroef en moeilijk te openen.","sub":[]},{"label":"Bij problemen","body":"Is er toch een probleem, dan is dit voor Depannage, niet voor de App-wachtdienst.","sub":[]}]}},"specific":[{"topic":"Poort gaat niet open","text":"OPGELET!\nDeurne heeft een afgesloten parking MET code\nKlant moet steeds:\neerst op de C (clear) duwen\ndan de viercijferige code ingeven\nbevestigen met enter\nPoort zal meteen terug sluiten, klant moet dit opnieuw doen op het klavier aan de binnenkant om buiten te geraken\nDe code verandert wekelijks op maandag 00u01.\nCodes staan steeds op contract aangeduid als (C1234ENTER) met de juiste code voor het moment van ophalen en van afzetten volgens data op het contract.\nBij veel klanten loopt het mis omdat ze de C niet eerst gebruiken, het is dus de bedoeling dat steeds uitdrukkelijk te vermelden want zonder de C werkt het niet.\n\nWij hebben GEEN codes van de poorten.\nWij kunnen/mogen hier ook niemand voor bellen.\nKlanten MOETEN op hun contract kijken onder “MEMO”.\nOm veiligheidsredenen mogen/kunnen deze niet telefonisch doorgegeven worden per telefoon na de uren.","shopnames":["DOCKX RENTAL DEURNE"],"shops":1},{"topic":"Afhaling IKEA of andere","text":"Ikea\nBestelling\nOp bestelbon staat de leveringsdatum. Deze komt niet vroeger of later toe indien uitzonderlijk.\nVrijwel altijd beschikbaar na 31 dagen.\nBlijft 10 werkdagen in de shop liggen. (soms langer wij zeggen dit niet tegen de klant)\nIndien ze vragen hebben, kunnen ze bellen naar:\nIkea Klantendienst: 02 719 19 22\nVan 09:00u tot 20:00u bereikbaar\n\nAndere Zendingen\nGegevens noteren","shopnames":["DOCKX RENTAL VORST"],"shops":1},{"topic":"Taal & werkwijze","shopnames":["DOCKX RENTAL LUIK","DOCKX RENTAL CHARLEROI"],"shops":2,"variants":[{"shopname":"DOCKX RENTAL LUIK","text":"Berichten steeds in het Frans noteren!\nMessages en français!"},{"shopname":"DOCKX RENTAL CHARLEROI","text":"Berichten steeds in het Frans noteren!\nMessages en français!\nSteeds vragen of het voor Charleroi of Luik/Liège is en dan de juiste klantenfiche gebruiken!"}]}],"saydo":{"Ongeval / Panne":{"Via de App | Dringend | App-issue | Tijdens openingsuren":{"say":"Ik begrijp dat het dringend is. Ik zorg er meteen voor dat de juiste mensen u zo snel mogelijk verder helpen.","agentdo":["Bel de shop (2 pogingen).","Daarna Permanentie App +3238308887 (2 pogingen + cascade).","Onbereikbaar? Zie cascade onderaan de fiche."],"botdo":["Ticket aanmaken in MemoWeb (registratie van elk gesprek).","Meteen doorschakelen naar een collega (warme overdracht).","Context meegeven: app-issue, dringend, tijdens openingsuren."]},"Via de App | Dringend | App-issue | Buiten openingsuren":{"say":"Ik begrijp dat het dringend is. Ik schakel u door naar de juiste wachtdienst zodat u zo snel mogelijk geholpen wordt.","agentdo":["Bel Permanentie App +3238308887 (2 pogingen + cascade).","Onbereikbaar? Zie cascade onderaan de fiche."],"botdo":["Ticket aanmaken in MemoWeb (registratie van elk gesprek).","Meteen doorschakelen naar de Permanentie App-wachtdienst.","Context meegeven: app-issue, dringend, buiten openingsuren."]},"Via de App | Dringend | Geen app-issue | Tijdens openingsuren":{"say":"Ik begrijp dat het dringend is. Ik regel meteen de juiste hulp voor u.","agentdo":["Bel de shop (2 pogingen).","Daarna Depannage +3238308886."],"botdo":["Ticket aanmaken in MemoWeb (registratie van elk gesprek).","Meteen doorschakelen naar een collega (warme overdracht).","Context meegeven: dringend, geen app-issue, tijdens openingsuren."]},"Via de App | Dringend | Geen app-issue | Buiten openingsuren":{"say":"Ik begrijp dat het dringend is. Ik schakel de pechverhelping in zodat u zo snel mogelijk geholpen wordt.","agentdo":["Bel Depannage +3238308886.","Mail naar: legal@dockx.be, denis.jacobs@dockx.be, michiel.claus@dockx.be.","Geen reactie? Bel Joeri Dockx +32476865017."],"botdo":["Ticket aanmaken in MemoWeb (registratie van elk gesprek).","Meteen doorschakelen naar de Depannage-wachtdienst.","Context meegeven: dringend, geen app-issue, buiten openingsuren."]},"Via de App | Niet dringend":{"say":"Ik noteer uw melding. Onze collega's nemen zo snel mogelijk contact met u op.","agentdo":["Bericht aanmaken in de fiche van de (opvolg)shop. De klant wordt zo snel mogelijk teruggebeld."],"botdo":["Ticket aanmaken in MemoWeb (registratie van elk gesprek).","Bericht aanmaken in de fiche van de (opvolg)shop. De klant wordt zo snel mogelijk teruggebeld."]},"Niet via de App | Dringend | Tijdens openingsuren":{"say":"Ik begrijp dat het dringend is. Ik regel meteen de juiste hulp voor u.","agentdo":["Bel de shop (2 pogingen).","Niet bereikbaar? Bel de shopmanager (zie bijlage).","Na 2 pogingen niet bereikbaar? Bel Depannage +3238308886.","Mail naar: legal@dockx.be, denis.jacobs@dockx.be, michiel.claus@dockx.be."],"botdo":["Ticket aanmaken in MemoWeb (registratie van elk gesprek).","Meteen doorschakelen naar een collega (warme overdracht).","Context meegeven: niet via app, dringend, tijdens openingsuren."]}},"Oproep politie":{"Tijdens kantooruren":{"say":"Ik geef dit meteen door aan de juiste collega.","agentdo":["Bel de shop (2 pogingen), nadien de shopmanager (zie bijlage).","Geen gehoor? Bel de volgende in cascade."],"botdo":["Ticket aanmaken in MemoWeb (registratie van elk gesprek).","Meteen doorschakelen naar een collega (warme overdracht).","Context meegeven: oproep politie, tijdens kantooruren."]},"Buiten kantooruren / feestdagen | Dringend":{"say":"Ik begrijp dat het dringend is. Ik schakel meteen de juiste wachtdienst in.","agentdo":["Wacht Depannage: bel ENKEL +3238308886.","Mail naar: dirk.moons@dockx.be, denis.jacobs@dockx.be, michiel.claus@dockx.be."],"botdo":["Ticket aanmaken in MemoWeb (registratie van elk gesprek).","Meteen doorschakelen naar de Wacht Depannage.","Context meegeven: oproep politie, dringend, buiten kantooruren."]},"Buiten kantooruren / feestdagen | Niet dringend":{"say":"Ik noteer alle gegevens. Onze collega's volgen dit eerstdaags op.","agentdo":["Alle info noteren zodat de shop eerstdaags kan opvolgen."],"botdo":["Ticket aanmaken in MemoWeb (registratie van elk gesprek).","Alle info noteren bij de (opvolg)shop zodat de collega's eerstdaags opvolgen."]}},"Betaling":{"Tijdens kantooruren":{"say":"Brengt u het voertuig tijdens de kantooruren binnen, dan overlopen onze collega's in de Service Shop meteen de afrekening met u en betaalt u daar ter plaatse.","agentdo":["Uitleggen hoe de betaling verloopt (afrekening en betaling gebeuren bij onze collega's in de Service Shop).","Gesprek noteren in MemoWeb."],"botdo":["Uitleggen hoe de betaling verloopt.","Ticket aanmaken in MemoWeb (registratie van elk gesprek)."]},"Buiten kantooruren":{"say":"Zet u het voertuig buiten de kantooruren af, dan gaat u binnen de drie dagen langs bij de Service Shop waar u het heeft afgezet, voor de afrekening en de betaling.","agentdo":["Uitleggen dat de klant binnen 3 dagen bij onze collega's in de Service Shop afrekent en betaalt.","Gesprek noteren in MemoWeb."],"botdo":["Uitleggen dat de afrekening en betaling binnen 3 dagen bij de collega's in de Service Shop gebeuren.","Ticket aanmaken in MemoWeb (registratie van elk gesprek)."]}},"Dockx App":{"Een PUP (Pick-Up Point)":{"say":"Ik noteer uw vraag voor de juiste collega's, die nemen dit verder op.","agentdo":["Noteren in de fiche van de juiste opvolgshop."],"botdo":["Ticket aanmaken in MemoWeb (registratie van elk gesprek).","Bericht noteren in de fiche van de juiste opvolgshop."]},"App-vraag, shop gebeld → wachtdienst":{"say":"Ik noteer uw vraag en zorg dat de juiste dienst dit oppakt.","agentdo":["Noteren in de fiche van de App.","Bericht copy-pasten en bij Dockx App 2.0 call reason 'oproep app via shop' selecteren."],"botdo":["Ticket aanmaken in MemoWeb (registratie van elk gesprek).","Bericht noteren in de fiche van de App, met call reason 'oproep app via shop'."]},"Algemene vraag, geen wachtdienst":{"say":"Ik noteer uw vraag voor de juiste collega's, die nemen contact met u op.","agentdo":["Bericht noteren in de fiche van de betreffende shop."],"botdo":["Ticket aanmaken in MemoWeb (registratie van elk gesprek).","Bericht noteren in de fiche van de betreffende shop."]}},"Annulatie":{"Minder dan 48u":{"say":"Omdat het minder dan 48 uur voor de reservatie is, kan er een annulatiekost gelden. Daarover beslis ik niet zelf — ik geef het door aan onze collega's van Dockx Rental, zij nemen contact met u op.","agentdo":["Uitleggen dat niet zelf over de annulatiekost beslist.","Alle info noteren zodat Dockx Rental de klant contacteert."],"botdo":["Ticket aanmaken in MemoWeb (registratie van elk gesprek).","Alle info noteren bij de (opvolg)shop zodat de collega's van Dockx Rental contact opnemen."]}},"Zendingen":{"DHL Express":{"say":"Ik noteer uw vraag; onze collega's nemen hierover contact met u op.","agentdo":["Wordt bij Dockx behandeld.","Vraag/info/opmerking noteren; de shop contacteert de klant."],"botdo":["Ticket aanmaken in MemoWeb (registratie van elk gesprek).","De vraag/info noteren bij de (opvolg)shop zodat de collega's contact opnemen."]}}},"saydo_direct":{"Reservatie na 48u":{"say":"Ik kan zelf geen reservatie maken, maar ik noteer alles en onze collega's nemen contact met u op.","agentdo":["Wij kunnen geen reservatie boeken.","Alles noteren en de klant laten weten dat de shop hen contacteert."],"botdo":["Ticket aanmaken in MemoWeb (registratie van elk gesprek).","Bericht noteren bij de (opvolg)shop zodat de collega's contact opnemen."]},"Proces-verbaal / Klacht":{"say":"Voor een proces-verbaal of klacht neemt u zelf contact op met de politie.","agentdo":["De klant neemt zelf contact op met de politie."],"botdo":["Meedelen dat de klant zelf contact opneemt met de politie.","Ticket aanmaken in MemoWeb (registratie van elk gesprek)."]},"Code poort":{"say":"Wij hebben de poortcodes niet — u vindt de code op uw contract onder 'MEMO'. Om veiligheidsredenen geven we codes na de openingsuren niet telefonisch door. Zit u vast op de parking, dan zorgen wij wel meteen voor hulp.","agentdo":["De juiste werkwijze / verwijzing meedelen (code op contract onder 'MEMO').","Om veiligheidsredenen na de uren niet telefonisch doorgeven.","Uitzondering — klant zit vast op de parking: escalatie van de shop in bijlage contacteren."],"botdo":["De info meedelen (code op contract onder 'MEMO').","Ticket aanmaken in MemoWeb (registratie van elk gesprek).","Uitzondering — klant zit vast op de parking: meteen doorschakelen naar een mens."]},"Belt zelf terug":{"say":"","agentdo":["Opslaan als behandeld, status 'voltooid' (laatste vakje boven 'Free text')."],"botdo":["Ticket in MemoWeb sluiten met status 'voltooid'."]},"Huurperiode verlengen":{"say":"Verlengen kan online via My Dockx Rental, schriftelijk of bij onze shop — niet telefonisch. Daarbij passen we de waarborg aan en volgt er een nieuw contract; zonder contract bent u niet verzekerd. Ik noteer uw vraag zodat onze collega's contact met u opnemen.","agentdo":["Uitleggen dat verlengen kan via My Dockx Rental, schriftelijk of bij de shop — niet telefonisch.","Uitleggen dat de waarborg wordt aangepast en er een nieuw contract volgt (zonder contract geen verzekering).","Wij kunnen zelf geen verlenging doen — noteren zodat de shop contact neemt."],"botdo":["Ticket aanmaken in MemoWeb (registratie van elk gesprek).","De vraag noteren bij de (opvolg)shop zodat de collega's contact opnemen."]},"Huren via de shop":{"say":"Een personenwagen huren kan bij onze shop, maar enkel met kredietkaart en alleen als de houder van die kaart zelf aanwezig is. U kunt dus niet huren met de kredietkaart van iemand anders tenzij die persoon er ook bij is.","agentdo":["Klant informeren dat huren via de shop kan, enkel met kredietkaart en met de kaarthouder aanwezig."],"botdo":["De voorwaarde meedelen.","Ticket aanmaken in MemoWeb (registratie van elk gesprek)."]},"Taal & werkwijze":{"say":"","agentdo":["Berichten steeds in het Frans noteren (messages en français).","Steeds vragen of het voor Charleroi of Luik/Liège is en dan de juiste klantenfiche gebruiken."],"botdo":["Notitie in het Frans aanmaken.","Juiste klantenfiche (Charleroi of Luik/Liège) selecteren.","Ticket aanmaken in MemoWeb (registratie van elk gesprek)."]},"Openingsuren":{"say":"Onze shop is open van maandag tot zaterdag, van 7u30 tot 12u en van 13u tot 18u30. Op zon- en feestdagen zijn we gesloten.","agentdo":["Openingsuren meedelen."],"botdo":["De openingsuren meedelen.","Ticket aanmaken in MemoWeb (registratie van elk gesprek)."]},"Algemene voorwaarden":{"say":"De minimumleeftijd en het vereiste rijbewijs hangen af van het type voertuig. Ik kan u onze voorwaarden voor uw voertuig toelichten.","agentdo":["De voorwaarden voor het juiste voertuigtype meedelen."],"botdo":["De voorwaarden voor het gevraagde voertuigtype meedelen.","Ticket aanmaken in MemoWeb (registratie van elk gesprek)."]},"Rijbewijs":{"say":"Welk rijbewijs u nodig heeft, hangt af van het voertuig. Ik kan u zeggen welke categorie bij uw voertuig hoort.","agentdo":["De juiste rijbewijscategorie meedelen."],"botdo":["De juiste rijbewijscategorie meedelen.","Ticket aanmaken in MemoWeb (registratie van elk gesprek)."]},"Afhalen voertuig":{"say":"Bij het afhalen brengt u een geldige Belgische identiteitskaart, een geldig Europees rijbewijs en een krediet- of bankkaart mee.","agentdo":["De mee te brengen documenten meedelen."],"botdo":["De mee te brengen documenten meedelen.","Ticket aanmaken in MemoWeb (registratie van elk gesprek)."]},"Voertuig binnenbrengen":{"say":"U brengt het voertuig binnen op de dag dat het contract afloopt, vóór 7u30 's morgens, en levert het proper in — binnen én buiten. Is het niet proper, dan rekenen onze collega's in de Service Shop een extra reinigingskost aan. Ik kan u de details voor uw situatie geven.","agentdo":["De inlevervoorwaarden uitleggen (tijdstip, buiten de uren, andere shop, proper inleveren).","Uitleggen dat Dockx een reinigingskost aanrekent bij een niet-proper voertuig."],"botdo":["De inlevervoorwaarden meedelen.","Ticket aanmaken in MemoWeb (registratie van elk gesprek)."]},"Brandstof":{"say":"U vertrekt met een volle tank en brengt het voertuig met een volle tank terug. Lukt dat niet, dan tanken onze collega's in de Service Shop het voertuig vol en komt dat tegen dagprijs op uw eindfactuur.","agentdo":["Het brandstofbeleid uitleggen (volle tank in en uit; anders tankt Dockx vol en komt het op de factuur)."],"botdo":["Het brandstofbeleid meedelen.","Ticket aanmaken in MemoWeb (registratie van elk gesprek)."]},"Dringende reservatie (ma-vr)":{"say":"Een personenwagen huren kan, maar enkel met kredietkaart en alleen als de houder van die kaart zelf aanwezig is.","agentdo":["De voorwaarde (kredietkaart + houder aanwezig) meedelen."],"botdo":["De voorwaarde meedelen.","Ticket aanmaken in MemoWeb (registratie van elk gesprek)."]},"Dringende reservatie (weekend)":{"say":"Een personenwagen huren kan, maar enkel met kredietkaart en alleen als de houder van die kaart zelf aanwezig is.","agentdo":["De voorwaarde (kredietkaart + houder aanwezig) meedelen."],"botdo":["De voorwaarde meedelen.","Ticket aanmaken in MemoWeb (registratie van elk gesprek)."]},"Laadkleppen":{"say":"Via de QR-code op de zijkant van de wagen vindt u een handleiding met filmpje. De bovenklep moet u soms met wat kracht openduwen.","agentdo":["Verwijzen naar de QR-handleiding.","Bij een echt technisch probleem: dit is voor Depannage, niet voor de App-wachtdienst."],"botdo":["Verwijzen naar de QR-handleiding.","Ticket aanmaken in MemoWeb (registratie van elk gesprek).","Bij een echt technisch probleem doorschakelen naar Depannage."]},"Poort gaat niet open":{"say":"Druk eerst op de C (clear), geef dan de viercijferige code in en bevestig met enter. De code vindt u op uw contract en verandert wekelijks.","agentdo":["De juiste werkwijze meedelen (eerst C, dan code, enter)."],"botdo":["De juiste werkwijze meedelen (eerst C, dan code, enter).","Ticket aanmaken in MemoWeb (registratie van elk gesprek).","Zit de klant vast op de parking: meteen doorschakelen naar een mens."]},"Afhaling IKEA of andere":{"say":"De leveringsdatum staat op uw bestelbon. Uw bestelling blijft enkele werkdagen bij ons in de shop liggen. Bij vragen kunt u de IKEA-klantendienst bellen.","agentdo":["De info over levering en afhaling meedelen.","Gesprek noteren in MemoWeb."],"botdo":["Ticket aanmaken in MemoWeb (registratie van elk gesprek).","De gegevens noteren bij de (opvolg)shop."]}},"urgency_scale":{"intro":"Hulpmiddel om in te schatten hoe dringend een melding is. Schuif langs de schaal: 0–3 = niet dringend, 4–6 = twijfel / opvolgen, 7–10 = dringend. De voorbeelden bij 0, 2 (richtingaanwijzer/raam) en 8–9 (lekke band, motor, technisch defect) komen uit de Dockx-bron; de tussenliggende niveaus zijn een voorstel dat Dockx nog moet bevestigen.","bands":[{"range":"0–3","label":"Niet dringend","tone":"low"},{"range":"4–6","label":"Twijfel / opvolgen","tone":"mid"},{"range":"7–10","label":"Dringend","tone":"high"}],"levels":[{"n":0,"title":"Louter informatie","example":"Algemene vraag, geen probleem met het voertuig (bv. vraag over de factuur of openingsuren.)","source":false},{"n":1,"title":"Cosmetisch","example":"Klein uiterlijk detail zonder enige impact op het rijden (bv. een vlek of krasje.)","source":false},{"n":2,"title":"Comfort / klein defect","example":"Raam gaat niet open, richtingaanwijzer werkt niet — hindert niet veilig rijden.","source":true},{"n":3,"title":"Klein ongemak","example":"Een functie werkt niet goed maar het voertuig blijft normaal en veilig bruikbaar (bv. radio of airco valt uit.)","source":false},{"n":4,"title":"Hinderlijk, niet acuut","example":"Storing die het gebruik bemoeilijkt maar uitstel toelaat (bv. een waarschuwingslampje zonder vermogensverlies.)","source":false},{"n":5,"title":"Twijfelgeval","example":"Onduidelijk of het veilig is om door te rijden — bij twijfel als dringend behandelen en navragen.","source":false},{"n":6,"title":"Beperkt bruikbaar","example":"Voertuig rijdt nog maar met duidelijke beperking (bv. één deur sluit niet goed, beperkte zichtbaarheid.)","source":false},{"n":7,"title":"Veiligheid in het geding","example":"Defect dat de veiligheid raakt en snel opgelost moet worden (bv. remmen voelen zwak, verlichting valt uit bij duisternis.)","source":false},{"n":8,"title":"Technisch defect / pech","example":"Lekke band, technisch defect — het voertuig is niet of nauwelijks bruikbaar.","source":true},{"n":9,"title":"Voertuig staat stil","example":"Motorproblemen, voertuig start niet of valt stil — pechverhelping nodig.","source":true},{"n":10,"title":"Noodsituatie","example":"Ongeval, onmiddellijk gevaar of voertuig blokkeert een onveilige plek — directe actie en mogelijk politie.","source":false}]}};
+</script>
+<script>
+const V=window.VAL_DATA;
+const esc=s=>(s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+let state={};
+let TEAMPASS="";                 // gedeeld teamwachtwoord (in geheugen)
+let _saveTimer=null, _saveOk=true;
+let _pendingTopics=new Set();     // topics die nog opgeslagen moeten worden
+
+// ---- Topic-mapping: groepeer de platte state-keys per topic ----
+const SPECIAL_TOPIC="__doc__";   // niet-topic-gebonden (bv. losse instellingen)
+function topicForStateKey(k){
+  if(k==="blocks"||k==="treegaps") return null; // worden apart afgehandeld
+  const m=k.match(/^(std|spec|div|gap)_(\d+)$/);
+  if(m){
+    const idx=+m[2];
+    if(m[1]==="std") return (V.standard[idx]||{}).topic;
+    if(m[1]==="spec") return (V.specific[idx]||{}).topic;
+    if(m[1]==="div") return (V.divergent[idx]||{}).topic;
+    if(m[1]==="gap") return "__gaps__"; // deel-4 gaten samen
+  }
+  return SPECIAL_TOPIC;
+}
+function topicForBlockKey(bk){
+  if(bk==="urgentie::schaal") return "__urgentie__";
+  if(bk.indexOf("gap::")===0) return "__gaps__";
+  if(bk.indexOf("treegap::")===0){
+    // treegap::<topic>::gap::<path>
+    const rest=bk.slice("treegap::".length);
+    return rest.split("::")[0];
+  }
+  // "<topic>::..." 
+  return bk.split("::")[0];
+}
+// Bouw een per-topic payload-object uit de huidige state
+function collectTopicData(topic){
+  const data={items:{},blocks:{},treegaps:{}};
+  Object.keys(state).forEach(k=>{
+    if(k==="blocks"||k==="treegaps") return;
+    if(topicForStateKey(k)===topic) data.items[k]=state[k];
+  });
+  if(state.blocks) Object.keys(state.blocks).forEach(bk=>{
+    if(topicForBlockKey(bk)===topic) data.blocks[bk]=state.blocks[bk];
+  });
+  if(state.treegaps) Object.keys(state.treegaps).forEach(gk=>{
+    if(topicForBlockKey("treegap::"+gk)===topic) data.treegaps[gk]=state.treegaps[gk];
+  });
+  return data;
+}
+// Welke topic(s) horen bij een wijziging aan een bepaalde key?
+function topicsTouchedBy(keyOrBlock,isBlock){
+  const t = isBlock ? topicForBlockKey(keyOrBlock) : topicForStateKey(keyOrBlock);
+  return t?[t]:[];
+}
+
+// ---- API-laag ----
+async function api(path,opts){
+  opts=opts||{};
+  opts.headers=Object.assign({"Content-Type":"application/json","x-team-pass":TEAMPASS},opts.headers||{});
+  const r=await fetch("/api/"+path,opts);
+  return r;
+}
+async function loadFromServer(){
+  const r=await api("state");
+  if(!r.ok) throw new Error("load "+r.status);
+  const j=await r.json();
+  // herbouw de platte state uit de per-topic rijen
+  state={};
+  Object.keys(j.topics||{}).forEach(topic=>{
+    const d=j.topics[topic]||{};
+    Object.assign(state, d.items||{});
+    if(d.blocks){ state.blocks=state.blocks||{}; Object.assign(state.blocks,d.blocks); }
+    if(d.treegaps){ state.treegaps=state.treegaps||{}; Object.assign(state.treegaps,d.treegaps); }
+  });
+}
+async function flushPending(){
+  const topics=[..._pendingTopics]; _pendingTopics.clear();
+  let allOk=true;
+  for(const topic of topics){
+    try{
+      const data=collectTopicData(topic);
+      const r=await api("state",{method:"POST",body:JSON.stringify({topic,data})});
+      if(!r.ok) allOk=false;
+    }catch(e){ allOk=false; }
+  }
+  _saveOk=allOk;
+  if(allOk) flashSaved(); else flashError();
+}
+
+// save(touchKeys): markeer betrokken topics en stuur (debounced) naar de server
+function save(touchKeys){
+  // touchKeys: optioneel array van {key, isBlock}; zonder argument → alle topics
+  if(touchKeys && touchKeys.length){
+    touchKeys.forEach(t=>topicsTouchedBy(t.key,t.isBlock).forEach(tp=>_pendingTopics.add(tp)));
+  } else {
+    // markeer alles
+    allTopicGroups().forEach(tp=>_pendingTopics.add(tp));
+  }
+  clearTimeout(_saveTimer);
+  _saveTimer=setTimeout(flushPending,500);
+}
+function allTopicGroups(){
+  const set=new Set(["__gaps__","__urgentie__",SPECIAL_TOPIC]);
+  (V.standard||[]).forEach(it=>set.add(it.topic));
+  (V.specific||[]).forEach(it=>set.add(it.topic));
+  (V.divergent||[]).forEach(it=>set.add(it.topic));
+  return [...set];
+}
+function flashSaved(){
+  const el=document.getElementById("saveStatus");
+  if(!el)return;
+  el.textContent="Opgeslagen";el.className="save-status ok show";
+  clearTimeout(_saveTimer); // visual only
+  setTimeout(()=>{el.classList.remove("show");},1400);
+}
+function flashError(){
+  const el=document.getElementById("saveStatus");
+  if(el){el.textContent="⚠ Niet opgeslagen — probeer opnieuw";el.className="save-status err";}
+}
+
+function setState(id,patch){state[id]=Object.assign({},state[id]||{},patch);save([{key:id,isBlock:false}]);updateProgress();}
+
+// ---- Standard items ----
+// ---- Structured content rendering (same logic as the cockpit) ----
+const LOGIC=V.logic||{trees:{},direct:{},info:[]};
+function structuredBody(topic, text){
+  const tree=LOGIC.trees[topic], direct=LOGIC.direct[topic];
+  const isInfo=(LOGIC.info||[]).indexOf(topic)>=0;
+  // topics (outside the wizard branches) where urgency inschatting / escalation can apply
+  const URG_TOPICS=["Laadkleppen","Code poort","Poort gaat niet open"];
+  const urgPrefix = URG_TOPICS.indexOf(topic)>=0 ? urgencyHelper() : "";
+  if(tree)return renderTreeOverview(tree, topic);
+  if(direct)return urgPrefix+renderSteps(direct, topic);
+  // info topic: show the fiche content (naslag) + the say/agent/bot follow-up if present
+  const sd=(V.saydo_direct||{})[topic];
+  if(isInfo){
+    const fiche=renderInfoList(text, topic);
+    const fk=topic+"::fiche";
+    if(sd) return urgPrefix+`<div class="vb-fiche"><div class="vb-fiche-h">Wat in de fiche staat${blockCtrl(fk)}</div>${fiche}</div>${sayDoBlock(sd.say, sd.agentdo, sd.botdo, topic+"::direct")}`;
+    return urgPrefix+fiche;
+  }
+  // plain (e.g. specific topics): show text + say/agent/bot if present
+  if(sd){
+    const fk=topic+"::fiche";
+    return urgPrefix+`<div class="vb-fiche"><div class="vb-fiche-h">Wat in de fiche staat${blockCtrl(fk)}</div><div class="vb-plain">${esc(text)}</div></div>${sayDoBlock(sd.say, sd.agentdo, sd.botdo, topic+"::direct")}`;
+  }
+  return urgPrefix+`<div class="vb-plain">${esc(text)}</div>`;
+}
+function renderIntroV(tree){
+  if(!tree.intro||!tree.intro.length)return"";
+  return `<div class="vb-intro">${tree.intro.map(p=>`<p>${esc(p)}</p>`).join("")}</div>`;
+}
+function urgencyHelper(){
+  const s=V.urgency_scale; if(!s)return"";
+  const fk="urgentie::schaal";
+  const st=(state.blocks||{})[fk]||{};
+  const editing = st.s==="fix";
+  // edited overrides stored per level under st.levels[n] = {title, example}
+  const ed = st.levels||{};
+  const levels=s.levels.map(l=>{
+    const tone = l.n<=3?"low":(l.n<=6?"mid":"high");
+    const src = l.source?`<span class="urg-src">uit de bron</span>`:`<span class="urg-concept">concept</span>`;
+    const curTitle = (ed[l.n]&&ed[l.n].title!==undefined)?ed[l.n].title:l.title;
+    const curEx = (ed[l.n]&&ed[l.n].example!==undefined)?ed[l.n].example:l.example;
+    if(editing){
+      return `<div class="urg-row urg-${tone}">
+        <div class="urg-num">${l.n}</div>
+        <div class="urg-body">
+          <div class="urg-title">${src}</div>
+          <input class="urg-edit-title" data-urgedit="${l.n}" data-urgfield="title" value="${esc(curTitle).replace(/"/g,'&quot;')}" placeholder="Titel">
+          <textarea class="urg-edit-ex" data-urgedit="${l.n}" data-urgfield="example" rows="2" placeholder="Voorbeeld">${esc(curEx)}</textarea>
+        </div>
+      </div>`;
+    }
+    return `<div class="urg-row urg-${tone}">
+      <div class="urg-num">${l.n}</div>
+      <div class="urg-body"><div class="urg-title">${esc(curTitle)} ${src}</div><div class="urg-ex">${esc(curEx)}</div></div>
+    </div>`;
+  }).join("");
+  const bands=s.bands.map(b=>`<span class="urg-band urg-${b.tone}">${esc(b.range)} · ${esc(b.label)}</span>`).join("");
+  const midNotice=`<div class="urg-midnotice"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg><span>De bron geeft alleen instructies voor <b>dringend</b> (7–10) en <b>niet dringend</b> (0–3). Voor het tussengebied <b>twijfel / opvolgen (4–6)</b> is er geen vastgelegde regel: <b>behandel het bij twijfel als dringend</b> en laat Dockx dit nog bevestigen.</span></div>`;
+  const editHint = editing?`<div class="urg-edithint">Pas hieronder de titels en voorbeelden aan. De wijzigingen worden bewaard.</div>`:"";
+  return `<details class="urg-wrap${editing?" editing":""}"${editing?" open":""}><summary class="urg-sum"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>Hulpmiddel: hoe dringend is het? (urgentieschaal 0–10)<span class="urg-ctrl">${blockCtrl(fk)}</span></summary>
+    <div class="urg-inner">
+      <div class="urg-intro">${esc(s.intro)}</div>
+      <div class="urg-bands">${bands}</div>
+      ${midNotice}
+      ${editHint}
+      <div class="urg-levels">${levels}</div>
+    </div></details>`;
+}
+function flattenTreeV(tree){
+  const out=[];
+  (function walk(qid,path){
+    const q=tree.questions[qid];
+    q.opties.forEach(o=>{
+      const np=path.concat([o.label]);
+      if(o.next)walk(o.next,np);
+      else out.push({path:np,action:o.action||[],gap:!!o.gap,reason:o.gap_reason});
+    });
+  })(tree.start,[]);
+  return out;
+}
+function blockCtrl(bk){
+  const st=(state.blocks||{})[bk]||{};
+  const ok=st.s==="ok"?" on":"", fix=st.s==="fix"?" on":"";
+  return `<span class="sd-ctrl">
+    <button class="sd-btn ok${ok}" data-blk="${bk}" data-bact="ok" title="Goedkeuren">✓</button>
+    <button class="sd-btn fix${fix}" data-blk="${bk}" data-bact="fix" title="Aanpassen">✎</button>
+  </span>`;
+}
+function blockEditField(bk, lines){
+  const st=(state.blocks||{})[bk]||{};
+  if(st.s!=="fix")return "";
+  const val = st.text!==undefined ? st.text : (lines||[]).join("\n");
+  return `<textarea class="sd-edit" data-blkedit="${bk}" rows="3" placeholder="Pas de tekst aan…">${esc(val)}</textarea>`;
+}
+function sayDoBlock(say, agentDo, botDo, keyBase){
+  const sayK=keyBase+"|say", agK=keyBase+"|agent", botK=keyBase+"|bot";
+  const stCls=bk=>{const s=(state.blocks||{})[bk]||{};return s.s==="ok"?" blk-ok":(s.s==="fix"?" blk-fix":"");};
+  let h="";
+  if(say && say.trim()){
+    h+=`<div class="sd-say${stCls(sayK)}"><div class="sd-lbl">Wat we zeggen<span class="sd-concept">concept — door Dockx te bevestigen</span>${blockCtrl(sayK)}</div><div class="sd-saytext">"${esc(say)}"</div>${blockEditField(sayK,[say])}</div>`;
+  }
+  h+=`<div class="sd-do sd-agent${stCls(agK)}"><div class="sd-lbl">Wat de agent doet${blockCtrl(agK)}</div>`;
+  if(agentDo && agentDo.length){ h+=`<ul>${agentDo.map(a=>`<li>${esc(a)}</li>`).join("")}</ul>`; }
+  else { h+=`<div class="sd-empty">Geen handeling — enkel meedelen.</div>`; }
+  h+=blockEditField(agK,agentDo)+`</div>`;
+  h+=`<div class="sd-do sd-bot${stCls(botK)}"><div class="sd-lbl">Wat de bot doet<span class="sd-concept">concept — door Dockx te bevestigen</span>${blockCtrl(botK)}</div>`;
+  if(botDo && botDo.length){ h+=`<ul>${botDo.map(a=>`<li>${esc(a)}</li>`).join("")}</ul>`; }
+  else { h+=`<div class="sd-empty">Geen handeling — enkel meedelen.</div>`; }
+  h+=blockEditField(botK,botDo)+`</div>`;
+  return h;
+}
+function renderTreeOverview(tree, topic){
+  const sd=(V.saydo||{})[topic]||{};
+  const rows=flattenTreeV(tree).map((p,ri)=>{
+    const conds=p.path.map(c=>{
+      const isUrg=(c==="Dringend"||c==="Niet dringend");
+      const help=isUrg?`<button class="urg-help" data-urghelp="1" title="Hoe dringend is het? Open de urgentieschaal">?</button>`:"";
+      return `<span class="vb-cond${isUrg?" vb-cond-urg":""}">${esc(c)}${help}</span>`;
+    }).join('<span class="vb-condsep">+</span>');
+    let dan;
+    if(p.gap){
+      const gk=topic+"::gap::"+p.path.join(" | ");
+      const cur=(state.treegaps||{})[gk]||"";
+      const bk="treegap::"+gk;
+      const reason=p.reason?`<div class="vb-gap-reason">${esc(p.reason)}</div>`:"";
+      dan=`<div class="vb-gap-wrap">
+        <div class="vb-gap">⚠ Ontbreekt in de bron — Dockx vult aan${blockCtrl(bk)}</div>
+        ${reason}
+        <textarea class="vb-gap-field" data-treegap="${gk}" rows="2" placeholder="Wat moet de agent / voicebot hier doen?">${esc(cur)}</textarea>
+      </div>`;
+    } else {
+      const entry=sd[p.path.join(" | ")];
+      if(entry) dan=sayDoBlock(entry.say, entry.agentdo, entry.botdo, topic+"::"+p.path.join(" | "));
+      else dan=`<ul class="vb-acts">${p.action.map(a=>`<li>${esc(a)}</li>`).join("")}</ul>`;
+    }
+    return `<div class="vb-row${p.gap?" gap":""}"><div class="vb-als">${conds}</div><div class="vb-dan">${dan}</div></div>`;
+  }).join("");
+  const hasUrgency=flattenTreeV(tree).some(p=>p.path.includes("Dringend")||p.path.includes("Niet dringend"));
+  const urg=hasUrgency?urgencyHelper():"";
+  return `${renderIntroV(tree)}${urg}<div class="vb-overview">${rows}</div>`;
+}
+function renderSteps(steps, topic){
+  const sd=(V.saydo_direct||{})[topic];
+  if(sd) return sayDoBlock(sd.say, sd.agentdo, sd.botdo, topic+"::direct");
+  return `<ol class="vb-steps">${steps.map(a=>`<li>${esc(a)}</li>`).join("")}</ol>`;
+}
+function parseInfoV(text){
+  const raw=text.split("\n").map(x=>x.replace(/\("file:\/\/[^)]*\)/g,"").trim());
+  const LABEL=/^([A-Z][^:]{0,48}?):\s+(.+)$/;
+  const items=[]; let buf=null;
+  const flush=()=>{if(buf!==null){items.push(buf);buf=null;}};
+  const curtxt=()=>buf?((("body" in buf)?buf.body:buf.para)||""):"";
+  for(const s of raw){
+    if(!s){flush(); if(items.length&&!items[items.length-1].sep)items.push({sep:true}); continue;}
+    const m=s.match(LABEL); const isLabel=m&&m[1].trim().split(/\s+/).length<=6;
+    const mid=!!buf&&/[,;:]$/.test(curtxt().trim());
+    if(isLabel&&!mid){flush(); buf={label:m[1].trim(),body:m[2].trim(),sub:[]};}
+    else if(mid&&buf){
+      const tgt="body" in buf?"body":"para"; const cur=buf[tgt]||"";
+      if(/:$/.test(cur.trim())||buf.sub.length) buf.sub.push(s.replace(/[;.]$/,""));
+      else buf[tgt]=(cur+" "+s).trim();
+    } else {flush(); buf={para:s,sub:[]};}
+  }
+  flush();
+  while(items.length&&items[items.length-1].sep)items.pop();
+  return items;
+}
+function renderInfoList(text, topic){
+  const S=(V.info_struct||{})[topic];
+  if(S){
+    const intro=S.intro&&S.intro.length?`<div class="vb-intro">${S.intro.map(p=>`<p>${esc(p)}</p>`).join("")}</div>`:"";
+    const rows=S.items.map(it=>{
+      const sub=it.sub&&it.sub.length?`<ul class="vb-sub">${it.sub.map(s=>`<li>${esc(s)}</li>`).join("")}</ul>`:"";
+      const lbl=it.label?`<span class="vb-lbl">${esc(it.label)}</span>`:"";
+      const body=it.body?`<span class="vb-bodytext">${esc(it.body)}</span>`:"";
+      return `<div class="vb-item">${lbl}${body}${sub}</div>`;
+    }).join("");
+    return `${intro}<div class="vb-infolist">${rows}</div>`;
+  }
+  // fallback: live parser
+  const items=parseInfoV(text);
+  const rows=items.map(it=>{
+    if(it.sep)return `<div class="vb-sep"></div>`;
+    const sub=it.sub&&it.sub.length?`<ul class="vb-sub">${it.sub.map(s=>`<li>${esc(s)}</li>`).join("")}</ul>`:"";
+    if(it.label)return `<div class="vb-item"><span class="vb-lbl">${esc(it.label)}</span><span class="vb-bodytext">${esc(it.body)}</span>${sub}</div>`;
+    return `<div class="vb-item"><span class="vb-bodytext">${esc(it.para)}</span>${sub}</div>`;
+  }).join("");
+  return `<div class="vb-infolist">${rows}</div>`;
+}
+
+// ---- EDITABLE MODE ----
+// Build an editable data model from the topic's current structure (only first time).
+function buildEditModel(topic, text){
+  const tree=LOGIC.trees[topic], direct=LOGIC.direct[topic];
+  const isInfo=(LOGIC.info||[]).indexOf(topic)>=0;
+  if(tree){
+    return {type:"tree", intro:(tree.intro||[]).slice(),
+      rows: flattenTreeV(tree).map(p=>({conds:p.path.slice(), acts:(p.action||[]).slice(), gap:!!p.gap, reason:p.reason||""}))};
+  }
+  if(direct){ return {type:"steps", steps: direct.slice()}; }
+  if(isInfo){
+    const S=(V.info_struct||{})[topic];
+    if(S)return {type:"info", intro:(S.intro||[]).slice(),
+      items:S.items.map(it=>({label:it.label||"", body:it.body||"", sub:(it.sub||[]).slice()}))};
+    // fallback: split lines
+    return {type:"lines", lines:text.split("\n").filter(x=>x.trim())};
+  }
+  return {type:"lines", lines:text.split("\n").filter(x=>x.trim())};
+}
+function getEditModel(id, topic, text){
+  const st=state[id]||{};
+  if(st.edited) return st.edited;
+  return buildEditModel(topic, text);
+}
+function ta(val, dataAttr){ // small textarea
+  return `<textarea class="edit-ta" ${dataAttr} rows="2">${esc(val||"")}</textarea>`;
+}
+function inp(val, dataAttr){
+  return `<input class="edit-inp" ${dataAttr} value="${esc(val||"").replace(/"/g,'&quot;')}">`;
+}
+function editableBody(id, topic, text){
+  const m=getEditModel(id, topic, text);
+  if(m.type==="tree"){
+    const introHtml=`<div class="edit-block"><div class="edit-h">Intro</div>${
+      m.intro.map((p,i)=>`<div class="edit-line">${ta(p,`data-ed="${id}" data-path="intro.${i}"`)}<button class="edit-del" data-ed="${id}" data-del="intro.${i}">×</button></div>`).join("")
+    }<button class="edit-add" data-ed="${id}" data-add="intro">+ intro-regel</button></div>`;
+    const rowsHtml=m.rows.map((r,ri)=>`
+      <div class="edit-row">
+        <div class="edit-rowhead">Situatie ${ri+1}<button class="edit-del" data-ed="${id}" data-del="row.${ri}">× situatie</button></div>
+        <div class="edit-conds">
+          <div class="edit-sub">ALS (condities)</div>
+          ${r.conds.map((c,ci)=>`<div class="edit-line">${inp(c,`data-ed="${id}" data-path="row.${ri}.cond.${ci}"`)}<button class="edit-del" data-ed="${id}" data-del="row.${ri}.cond.${ci}">×</button></div>`).join("")}
+          <button class="edit-add" data-ed="${id}" data-add="row.${ri}.cond">+ conditie</button>
+        </div>
+        <div class="edit-acts">
+          <div class="edit-sub">DAN (acties)</div>
+          ${r.acts.map((a,ai)=>`<div class="edit-line">${ta(a,`data-ed="${id}" data-path="row.${ri}.act.${ai}"`)}<button class="edit-del" data-ed="${id}" data-del="row.${ri}.act.${ai}">×</button></div>`).join("")}
+          <button class="edit-add" data-ed="${id}" data-add="row.${ri}.act">+ actie</button>
+        </div>
+      </div>`).join("");
+    return `<div class="editwrap">${introHtml}${rowsHtml}<button class="edit-addrow" data-ed="${id}" data-add="row">+ als…dan toevoegen</button></div>`;
+  }
+  if(m.type==="steps"){
+    return `<div class="editwrap"><div class="edit-block"><div class="edit-h">Stappen</div>${
+      m.steps.map((s,i)=>`<div class="edit-line">${ta(s,`data-ed="${id}" data-path="step.${i}"`)}<button class="edit-del" data-ed="${id}" data-del="step.${i}">×</button></div>`).join("")
+    }<button class="edit-add" data-ed="${id}" data-add="step">+ stap</button></div></div>`;
+  }
+  if(m.type==="info"){
+    const introHtml=m.intro.length?`<div class="edit-block"><div class="edit-h">Intro</div>${
+      m.intro.map((p,i)=>`<div class="edit-line">${ta(p,`data-ed="${id}" data-path="intro.${i}"`)}<button class="edit-del" data-ed="${id}" data-del="intro.${i}">×</button></div>`).join("")
+    }<button class="edit-add" data-ed="${id}" data-add="intro">+ intro-regel</button></div>`:`<button class="edit-add" data-ed="${id}" data-add="intro">+ intro-regel</button>`;
+    const itemsHtml=m.items.map((it,ii)=>`
+      <div class="edit-item">
+        <div class="edit-line"><span class="edit-tag">Label</span>${inp(it.label,`data-ed="${id}" data-path="item.${ii}.label"`)}<button class="edit-del" data-ed="${id}" data-del="item.${ii}">× item</button></div>
+        <div class="edit-line"><span class="edit-tag">Tekst</span>${ta(it.body,`data-ed="${id}" data-path="item.${ii}.body"`)}</div>
+        ${it.sub.map((s,si)=>`<div class="edit-line edit-subline"><span class="edit-tag">•</span>${ta(s,`data-ed="${id}" data-path="item.${ii}.sub.${si}"`)}<button class="edit-del" data-ed="${id}" data-del="item.${ii}.sub.${si}">×</button></div>`).join("")}
+        <button class="edit-add" data-ed="${id}" data-add="item.${ii}.sub">+ subregel</button>
+      </div>`).join("");
+    return `<div class="editwrap">${introHtml}${itemsHtml}<button class="edit-addrow" data-ed="${id}" data-add="item">+ item toevoegen</button></div>`;
+  }
+  // lines
+  return `<div class="editwrap"><div class="edit-block">${
+    m.lines.map((l,i)=>`<div class="edit-line">${ta(l,`data-ed="${id}" data-path="line.${i}"`)}<button class="edit-del" data-ed="${id}" data-del="line.${i}">×</button></div>`).join("")
+  }<button class="edit-add" data-ed="${id}" data-add="line">+ regel</button></div></div>`;
+}
+
+function topicHasSayDo(topic){
+  return !!( (V.saydo&&V.saydo[topic]) || (V.saydo_direct&&V.saydo_direct[topic]) );
+}
+function renderStandard(){
+  const host=document.getElementById("list-standard");
+  host.innerHTML=V.standard.map((it,i)=>{
+    const id="std_"+i; const st=state[id]||{};
+    const sayDo=topicHasSayDo(it.topic);
+    const cls=st.status==="ok"?"done":(st.status==="fix"?"flag":"");
+    const isFix=st.status==="fix";
+    // card-level note/edit only for non-saydo topics; saydo topics use per-block controls
+    const note=(!sayDo && isFix)?`<div class="item-body"><label class="edit-notelbl">Verdere aanpassingen</label><textarea data-note="${id}" class="edit-notef" placeholder="Overige opmerkingen of context voor Dockx…">${esc(st.note||"")}</textarea></div>`:"";
+    const body=(!sayDo && isFix)
+      ? `<div class="item-body editmode">${editableBody(id,it.topic,it.text)}</div>`
+      : `<div class="item-body struct">${structuredBody(it.topic,it.text)}</div>`;
+    const cardChecks=sayDo?"":`<div class="checks">
+          <button class="chk ok ${st.status==="ok"?"on":""}" data-act="ok" data-id="${id}">Akkoord</button>
+          <button class="chk fix ${st.status==="fix"?"on":""}" data-act="fix" data-id="${id}">Aanpassen</button>
+        </div>`;
+    const cardStatus=sayDo?"":`<span class="item-status-print">${st.status==="ok"?"✓ Akkoord":(st.status==="fix"?"Aangepast":"")}</span>`;
+    return `<div class="item ${sayDo?"":cls}" data-id="${id}">
+      <div class="item-top">
+        <div class="statusdot"></div>
+        <div class="item-main">
+          <div class="item-topic">${esc(it.topic)}${cardStatus}</div>
+          <div class="item-meta">${
+            it.has_variants
+              ? `aanwezig bij ${it.present} vestigingen · ${it.std_using} gebruiken deze versie, ${it.present-it.std_using} wijken af (zie deel 2)`
+              : (it.present===16 ? `identiek bij alle ${it.present} vestigingen` : `identiek bij ${it.present} vestigingen`)
+          }</div>
+        </div>
+        ${cardChecks}
+      </div>
+      ${body}
+      ${note}
+    </div>`;
+  }).join("");
+}
+
+function renderSpecific(){
+  const host=document.getElementById("list-specific");
+  if(!host||!V.specific)return;
+  host.innerHTML=V.specific.map((it,i)=>{
+    const id="spec_"+i; const st=state[id]||{};
+    const cls=st.status==="ok"?"done":(st.status==="fix"?"flag":"");
+    const isFix=st.status==="fix";
+    const note=isFix?`<div class="item-body"><label class="edit-notelbl">Verdere aanpassingen</label><textarea data-note="${id}" class="edit-notef" placeholder="Overige opmerkingen of context voor Dockx…">${esc(st.note||"")}</textarea></div>`:"";
+    const body = it.variants
+      ? it.variants.map(vr=>`<div class="divrow"><div class="dlbl alt">${esc(vr.shopname)}</div><div class="alt-block"><ol class="vb-steps">${vr.text.split("\n").filter(x=>x.trim()).map(x=>`<li>${esc(x.trim())}</li>`).join("")}</ol></div></div>`).join("")
+      : (isFix
+          ? `<div class="item-body editmode">${editableBody(id,it.topic,it.text)}</div>`
+          : `<div class="item-body struct">${structuredBody(it.topic,it.text)}</div>`);
+    return `<div class="item ${cls}" data-id="${id}">
+      <div class="item-top">
+        <div class="statusdot"></div>
+        <div class="item-main">
+          <div class="item-topic">${esc(it.topic)}<span class="item-status-print">${st.status==="ok"?"✓ Akkoord":(st.status==="fix"?"Aangepast":"")}</span></div>
+          <div class="item-meta">alleen bij: ${esc(it.shopnames.join(", "))}</div>
+        </div>
+        <div class="checks">
+          <button class="chk ok ${st.status==="ok"?"on":""}" data-act="ok" data-id="${id}">Akkoord</button>
+          <button class="chk fix ${st.status==="fix"?"on":""}" data-act="fix" data-id="${id}">Aanpassen</button>
+        </div>
+      </div>
+      ${body}
+      ${note}
+    </div>`;
+  }).join("");
+}
+
+// ---- Divergent items ----
+function renderDivergent(){
+  const host=document.getElementById("list-divergent");
+  host.innerHTML=V.divergent.map((it,i)=>{
+    const id="div_"+i; const st=state[id]||{};
+    const cls=st.pick?"done":"";
+    const variants=it.variants.map((vr,vi)=>`
+      <div class="divrow">
+        <div class="dlbl alt">Afwijkende versie · <span class="dshops">${vr.shopnames.join(", ")}</span></div>
+        <div class="alt-block">${structuredBody(it.topic,vr.text)}</div>
+        <div class="pickrow">
+          <button class="pick ${st.pick==="std"?"on":""}" data-pick="std" data-id="${id}">Standaard geldt overal</button>
+          <button class="pick ${st.pick==="alt"+vi?"on":""}" data-pick="alt${vi}" data-id="${id}">Afwijking is correct</button>
+          <button class="pick ${st.pick==="both"?"on":""}" data-pick="both" data-id="${id}">Bewust verschil, beide kloppen</button>
+        </div>
+      </div>`).join("");
+    return `<div class="item ${cls}" data-id="${id}">
+      <div class="item-top">
+        <div class="statusdot"></div>
+        <div class="item-main">
+          <div class="item-topic">${esc(it.topic)}<span class="item-status-print">${st.pick?"✓ Beslist":""}</span></div>
+          <div class="item-meta">${it.std_shops} van ${it.total} vestigingen gebruiken de standaard</div>
+        </div>
+      </div>
+      <div class="divrow">
+        <div class="dlbl std">Standaard · <span class="dshops">${it.std_shops} vestigingen</span></div>
+        ${structuredBody(it.topic,it.standard)}
+      </div>
+      ${variants}
+    </div>`;
+  }).join("");
+}
+
+// ---- Gaps ----
+function renderGaps(){
+  const host=document.getElementById("list-gaps");
+  host.innerHTML=V.gaps.map((g,i)=>{
+    const id="gap_"+i; const st=state[id]||{};
+    const bk="gap::"+id;
+    const bst=(state.blocks||{})[bk]||{};
+    const filled=st.fill&&st.fill.trim()?"done":"";
+    const confirmedCls = bst.s==="ok"?" blk-ok":(bst.s==="fix"?" blk-fix":"");
+    return `<div class="gap ${filled}${confirmedCls}" data-id="${id}">
+      <div class="gap-top">
+        <div class="gap-topic">${esc(g.topic)}${blockCtrl(bk)}</div>
+        <div class="gap-cond"><b>Situatie:</b> ${esc(g.condition)}</div>
+        <div class="gap-reason">${esc(g.reason)}</div>
+      </div>
+      <div class="gap-fill">
+        <label>Instructie voor deze situatie</label>
+        <textarea data-gap="${id}" placeholder="Wat moet de agent / voicebot hier doen?">${esc(st.fill||"")}</textarea>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function updateProgress(){
+  const totalStd=V.standard.length, totalDiv=V.divergent.length, totalGap=V.gaps.length, totalSpec=(V.specific||[]).length;
+  let doneStd=0,doneDiv=0,doneGap=0,doneSpec=0;
+  V.standard.forEach((_,i)=>{if((state["std_"+i]||{}).status)doneStd++;});
+  V.divergent.forEach((_,i)=>{if((state["div_"+i]||{}).pick)doneDiv++;});
+  (V.specific||[]).forEach((_,i)=>{if((state["spec_"+i]||{}).status)doneSpec++;});
+  V.gaps.forEach((_,i)=>{const f=(state["gap_"+i]||{}).fill;if(f&&f.trim())doneGap++;});
+  const done=doneStd+doneDiv+doneSpec+doneGap, total=totalStd+totalDiv+totalSpec+totalGap;
+  document.getElementById("ptxt").textContent=`${done} / ${total} nagekeken`;
+  document.getElementById("pbar").style.width=(total?Math.round(done/total*100):0)+"%";
+  document.getElementById("cnt-std").textContent=`${doneStd}/${totalStd} nagekeken`;
+  document.getElementById("cnt-div").textContent=`${doneDiv}/${totalDiv} beslist`;
+  const cs=document.getElementById("cnt-spec");if(cs)cs.textContent=`${doneSpec}/${totalSpec} nagekeken`;
+  document.getElementById("cnt-gap").textContent=`${doneGap}/${totalGap} ingevuld`;
+}
+
+function renderSummary(){
+  document.getElementById("summary").innerHTML=`
+    <div class="sum-card"><div class="sum-num">${V.standard.length}</div><div class="sum-lbl">standaard-onderwerpen, gelijk voor alle ${V.meta.rental_shops} vestigingen</div></div>
+    <div class="sum-card teal"><div class="sum-num">${V.divergent.length}</div><div class="sum-lbl">onderwerpen waar een vestiging echt afwijkt</div></div>
+    <div class="sum-card"><div class="sum-num">${(V.specific||[]).length}</div><div class="sum-lbl">onderwerpen die maar bij enkele vestigingen bestaan</div></div>
+    <div class="sum-card orange"><div class="sum-num">${V.gaps.length}</div><div class="sum-lbl">situaties zonder instructie in de bron</div></div>`;
+}
+
+let _wired=false;
+function wire(){
+  if(_wired)return; _wired=true;
+  // ensure edit model exists & persist
+  function ensureModel(id, topic, text){
+    const st=state[id]||{};
+    if(!st.edited){ st.edited=buildEditModel(topic,text); state[id]=st; save([{key:id,isBlock:false}]); }
+    return st.edited;
+  }
+  function reRender(id){ if(id.indexOf("spec_")===0)renderSpecific();else renderStandard(); }
+  function topicTextFor(id){
+    const arr=id.indexOf("spec_")===0?V.specific:V.standard;
+    const idx=parseInt(id.split("_")[1],10); const it=arr[idx];
+    return {topic:it.topic, text:it.text||""};
+  }
+  // apply a deletion path to the model
+  function applyDelete(m, path){
+    const p=path.split(".");
+    if(p[0]==="intro") m.intro.splice(+p[1],1);
+    else if(p[0]==="step") m.steps.splice(+p[1],1);
+    else if(p[0]==="line") m.lines.splice(+p[1],1);
+    else if(p[0]==="row" && p.length===2) m.rows.splice(+p[1],1);
+    else if(p[0]==="row" && p[2]==="cond") m.rows[+p[1]].conds.splice(+p[3],1);
+    else if(p[0]==="row" && p[2]==="act") m.rows[+p[1]].acts.splice(+p[3],1);
+    else if(p[0]==="item" && p.length===2) m.items.splice(+p[1],1);
+    else if(p[0]==="item" && p[2]==="sub") m.items[+p[1]].sub.splice(+p[3],1);
+  }
+  function applyAdd(m, what){
+    const p=what.split(".");
+    if(what==="intro") m.intro.push("");
+    else if(what==="step") m.steps.push("");
+    else if(what==="line") m.lines.push("");
+    else if(what==="row") m.rows.push({conds:[""],acts:[""],gap:false,reason:""});
+    else if(what==="item") m.items.push({label:"",body:"",sub:[]});
+    else if(p[0]==="row" && p[2]==="cond") m.rows[+p[1]].conds.push("");
+    else if(p[0]==="row" && p[2]==="act") m.rows[+p[1]].acts.push("");
+    else if(p[0]==="item" && p[2]==="sub") m.items[+p[1]].sub.push("");
+  }
+  function applyEdit(m, path, val){
+    const p=path.split(".");
+    if(p[0]==="intro") m.intro[+p[1]]=val;
+    else if(p[0]==="step") m.steps[+p[1]]=val;
+    else if(p[0]==="line") m.lines[+p[1]]=val;
+    else if(p[0]==="row" && p[2]==="cond") m.rows[+p[1]].conds[+p[3]]=val;
+    else if(p[0]==="row" && p[2]==="act") m.rows[+p[1]].acts[+p[3]]=val;
+    else if(p[0]==="item" && p[2]==="label") m.items[+p[1]].label=val;
+    else if(p[0]==="item" && p[2]==="body") m.items[+p[1]].body=val;
+    else if(p[0]==="item" && p[2]==="sub") m.items[+p[1]].sub[+p[3]]=val;
+  }
+
+  document.body.addEventListener("click",e=>{
+    const c=e.target.closest(".chk");
+    if(c){const id=c.dataset.id,act=c.dataset.act;const cur=(state[id]||{}).status;
+      const ns=cur===act?null:act;
+      setState(id,{status:ns});
+      if(ns==="fix"){const {topic,text}=topicTextFor(id);ensureModel(id,topic,text);}
+      reRender(id);return;}
+    const del=e.target.closest(".edit-del");
+    if(del){const id=del.dataset.ed; const {topic,text}=topicTextFor(id); const m=ensureModel(id,topic,text);
+      applyDelete(m,del.dataset.del); state[id].edited=m; save([{key:id,isBlock:false}]); reRender(id); return;}
+    const add=e.target.closest(".edit-add,.edit-addrow");
+    if(add){const id=add.dataset.ed; const {topic,text}=topicTextFor(id); const m=ensureModel(id,topic,text);
+      applyAdd(m,add.dataset.add); state[id].edited=m; save([{key:id,isBlock:false}]); reRender(id); return;}
+    const p=e.target.closest(".pick");
+    if(p){const id=p.dataset.id,pk=p.dataset.pick;const cur=(state[id]||{}).pick;
+      setState(id,{pick:cur===pk?null:pk});renderDivergent();return;}
+    const uh=e.target.closest(".urg-help");
+    if(uh){
+      e.preventDefault(); e.stopPropagation();
+      // find the urgency scale within the same topic card and open + scroll to it
+      const card=uh.closest(".item");
+      const urg=card?card.querySelector(".urg-wrap"):null;
+      if(urg){ urg.open=true; urg.scrollIntoView({behavior:"smooth",block:"center"});
+        urg.classList.add("urg-flash"); setTimeout(()=>urg.classList.remove("urg-flash"),1200); }
+      return;
+    }
+    const blk=e.target.closest(".sd-btn");
+    if(blk){
+      e.preventDefault(); e.stopPropagation();
+      const bk=blk.dataset.blk, act=blk.dataset.bact;
+      state.blocks=state.blocks||{};
+      const cur=(state.blocks[bk]||{}).s;
+      const ns=cur===act?null:act;
+      state.blocks[bk]=Object.assign({},state.blocks[bk]||{},{s:ns});
+      save([{key:bk,isBlock:true}]); renderStandard(); renderSpecific(); renderGaps(); updateProgress(); return;
+    }
+  });
+  document.body.addEventListener("input",e=>{
+    if(e.target.dataset.urgedit){
+      const n=e.target.dataset.urgedit, field=e.target.dataset.urgfield;
+      state.blocks=state.blocks||{};
+      const fk="urgentie::schaal";
+      const blk=state.blocks[fk]||{};
+      blk.levels=blk.levels||{};
+      blk.levels[n]=Object.assign({},blk.levels[n]||{},{[field]:e.target.value});
+      state.blocks[fk]=blk;
+      save([{key:fk,isBlock:true}]); return;
+    }
+    if(e.target.dataset.treegap){
+      state.treegaps=state.treegaps||{};
+      state.treegaps[e.target.dataset.treegap]=e.target.value;
+      save([{key:'treegap::'+e.target.dataset.treegap,isBlock:true}]); return;
+    }
+    if(e.target.dataset.gap){setState(e.target.dataset.gap,{fill:e.target.value});return;}
+    if(e.target.dataset.note){setState(e.target.dataset.note,{note:e.target.value});return;}
+    if(e.target.dataset.blkedit){
+      const bk=e.target.dataset.blkedit;
+      state.blocks=state.blocks||{};
+      state.blocks[bk]=Object.assign({},state.blocks[bk]||{},{text:e.target.value});
+      save([{key:bk,isBlock:true}]); // no re-render: keep focus
+      return;
+    }
+    if(e.target.dataset.ed && e.target.dataset.path){
+      const id=e.target.dataset.ed; const {topic,text}=topicTextFor(id); const m=ensureModel(id,topic,text);
+      applyEdit(m,e.target.dataset.path,e.target.value); state[id].edited=m; save([{key:id,isBlock:false}]);
+      // no re-render on each keystroke (keeps focus); progress unaffected
+    }
+  });
+  function buildMailBody(){
+    const L=[];
+    L.push("Validatiedocument belscripts — ingevulde samenvatting");
+    L.push("");
+    let doneStd=0,doneDiv=0,doneGap=0;
+    V.standard.forEach((_,i)=>{if((state["std_"+i]||{}).status)doneStd++;});
+    V.divergent.forEach((_,i)=>{if((state["div_"+i]||{}).pick)doneDiv++;});
+    V.gaps.forEach((_,i)=>{const f=(state["gap_"+i]||{}).fill;if(f&&f.trim())doneGap++;});
+    L.push(`Standaard nagekeken: ${doneStd}/${V.standard.length}`);
+    L.push(`Afwijkingen beslist: ${doneDiv}/${V.divergent.length}`);
+    L.push(`Gaten ingevuld: ${doneGap}/${V.gaps.length}`);
+    L.push("");
+    L.push("== 1. STANDAARD ==");
+    V.standard.forEach((it,i)=>{const st=state["std_"+i]||{};
+      const s=st.status==="ok"?"Akkoord":st.status==="fix"?("Aanpassen"+(st.note?": "+st.note:"")):"—";
+      L.push(`- ${it.topic}: ${s}`);});
+    L.push("");
+    L.push("== 2. WIJKT AF PER VESTIGING ==");
+    V.divergent.forEach((it,i)=>{const st=state["div_"+i]||{};
+      const p=st.pick==="std"?"Standaard geldt overal":(st.pick&&st.pick.indexOf("alt")===0?"Afwijking is correct":st.pick==="both"?"Bewust verschil":"—");
+      L.push(`- ${it.topic}: ${p}`);});
+    L.push("");
+    L.push("== 3. ALLEEN BIJ SPECIFIEKE VESTIGINGEN ==");
+    (V.specific||[]).forEach((it,i)=>{const st=state["spec_"+i]||{};
+      const s=st.status==="ok"?"Akkoord":st.status==="fix"?("Aanpassen"+(st.note?": "+st.note:"")):"—";
+      L.push(`- ${it.topic} (${it.shopnames.join(", ")}): ${s}`);});
+    L.push("");
+    L.push("== 4. ONTBREEKT — IN TE VULLEN ==");
+    V.gaps.forEach((g,i)=>{const st=state["gap_"+i]||{};
+      L.push(`- ${g.topic} (${g.condition}): ${st.fill&&st.fill.trim()?st.fill:"[nog niet ingevuld]"}`);});
+    L.push("");
+    L.push("— Memo·Offitel · DOCKX validatiedocument");
+    return L.join("\n");
+  }
+  // ---- JSON EXPORT for voicebot knowledge base ----
+  function blockResolve(key, original){
+    // returns {status, text} where text = edited override if present, else original
+    const b=(state.blocks||{})[key]||{};
+    const status=b.s||null; // "ok" | "fix" | null
+    const text=(b.text!==undefined && b.text!=="")?b.text:null;
+    return {status, value: text!==null?text:original, edited: text!==null};
+  }
+  function resolveList(key, originalArr){
+    const b=(state.blocks||{})[key]||{};
+    const status=b.s||null;
+    if(b.text!==undefined && b.text!==""){
+      return {status, value: b.text.split("\n").map(x=>x.trim()).filter(Boolean), edited:true};
+    }
+    return {status, value: originalArr||[], edited:false};
+  }
+  function sayDoExport(keyBase, e){
+    return {
+      wat_we_zeggen: blockResolve(keyBase+"|say", e.say||""),
+      wat_de_agent_doet: resolveList(keyBase+"|agent", e.agentdo||[]),
+      wat_de_bot_doet: resolveList(keyBase+"|bot", e.botdo||[])
+    };
+  }
+  function buildExport(clean){
+    const out={
+      meta:{
+        bron:"DOCKX Validatiedocument",
+        geexporteerd:new Date().toISOString(),
+        type: clean?"kennisbank (gevalideerd)":"volledig (bron + concept + bevestigd)"
+      },
+      topics:{}
+    };
+    // wizard topics
+    Object.keys(V.saydo||{}).forEach(topic=>{
+      const eps=V.saydo[topic];
+      const situaties=[];
+      Object.keys(eps).forEach(path=>{
+        const keyBase=topic+"::"+path;
+        const sd=sayDoExport(keyBase, eps[path]);
+        const sit={condities:path.split(" | "), ...sd};
+        situaties.push(sit);
+      });
+      out.topics[topic]={type:"situaties", situaties};
+    });
+    // direct + info + specific (saydo_direct)
+    Object.keys(V.saydo_direct||{}).forEach(topic=>{
+      const e=V.saydo_direct[topic];
+      const keyBase=topic+"::direct";
+      out.topics[topic]={type:"enkelvoudig", ...sayDoExport(keyBase, e),
+        fiche: blockResolve(topic+"::fiche", "").status?{status:(state.blocks||{})[topic+"::fiche"].s}:undefined};
+    });
+    // gaps (deel 4)
+    out.gaten=(V.gaps||[]).map((g,i)=>{
+      const id="gap_"+i;
+      const fill=(state[id]||{}).fill||"";
+      const conf=(state.blocks||{})["gap::"+id]||{};
+      return {topic:g.topic, situatie:g.condition, reden:g.reason, ingevuld:fill, status:conf.s||null};
+    });
+    // in-tree gaps
+    out.gaten_in_boom=[];
+    Object.keys(V.saydo||{}).forEach(topic=>{}); // placeholder
+    (state.treegaps?Object.keys(state.treegaps):[]).forEach(gk=>{
+      const conf=(state.blocks||{})["treegap::"+gk]||{};
+      out.gaten_in_boom.push({sleutel:gk, ingevuld:state.treegaps[gk], status:conf.s||null});
+    });
+    // urgency scale
+    const us=V.urgency_scale;
+    if(us){
+      const ub=(state.blocks||{})["urgentie::schaal"]||{};
+      const edLevels=ub.levels||{};
+      out.urgentieschaal={
+        status: ub.s||null,
+        niveaus: us.levels.map(l=>({
+          n:l.n,
+          titel:(edLevels[l.n]&&edLevels[l.n].title!==undefined)?edLevels[l.n].title:l.title,
+          voorbeeld:(edLevels[l.n]&&edLevels[l.n].example!==undefined)?edLevels[l.n].example:l.example,
+          bron: !!l.source
+        }))
+      };
+    }
+    // full version: include original source text per topic
+    if(!clean){
+      out.bron_teksten={};
+      (V.standard||[]).concat(V.specific||[]).forEach(it=>{ out.bron_teksten[it.topic]=it.text||""; });
+    } else {
+      // clean: strip status/edited bookkeeping, keep only resolved values
+      const strip=o=>{
+        if(Array.isArray(o)) return o.map(strip);
+        if(o && typeof o==="object"){
+          if("value" in o && "status" in o) return o.value; // collapse block to its value
+          const r={}; Object.keys(o).forEach(k=>{ if(o[k]!==undefined) r[k]=strip(o[k]); }); return r;
+        }
+        return o;
+      };
+      out.topics=strip(out.topics);
+    }
+    return out;
+  }
+  function downloadJSON(obj, filename){
+    const blob=new Blob([JSON.stringify(obj,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url; a.download=filename; document.body.appendChild(a); a.click();
+    setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},100);
+  }
+  function stamp(){ const d=new Date(); const p=n=>String(n).padStart(2,"0");
+    return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+"-"+p(d.getHours())+p(d.getMinutes()); }
+  document.getElementById("exportCleanBtn").onclick=()=>{
+    downloadJSON(buildExport(true), "DOCKX_kennisbank_"+stamp()+".json");
+  };
+  document.getElementById("exportFullBtn").onclick=()=>{
+    downloadJSON(buildExport(false), "DOCKX_validatie_volledig_"+stamp()+".json");
+  };
+  document.getElementById("printBtn").onclick=()=>{
+    const subject="DOCKX validatiedocument — ingevuld";
+    const body=buildMailBody();
+    const href="mailto:tina.stroobandt@memo.be?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
+    // open mailclient
+    window.location.href=href;
+    // then open print dialog shortly after
+    setTimeout(()=>window.print(),600);
+  };
+  document.getElementById("resetBtn").onclick=async()=>{
+    if(confirm("Alle ingevulde keuzes en aanvullingen wissen? Dit geldt voor het hele team.")){
+      try{ await api("reset",{method:"POST"}); }catch(e){}
+      state={}; renderAll();
+    }
+  };
+}
+function renderAll(){renderStandard();renderSpecific();renderDivergent();renderGaps();updateProgress();}
+
+// ---- Login gate + server init ----
+function showLogin(msg){
+  const g=document.getElementById("loginGate");
+  g.style.display="flex";
+  if(msg){const e=document.getElementById("loginErr");e.textContent=msg;e.style.display="block";}
+}
+function hideLogin(){ document.getElementById("loginGate").style.display="none"; }
+async function doLogin(pw){
+  const r=await fetch("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pw})});
+  if(r.ok){
+    TEAMPASS=pw;
+    sessionStorage.setItem("dockx_pass",pw);
+    hideLogin();
+    try{ await loadFromServer(); }catch(e){}
+    renderSummary();renderAll();wire();
+    document.getElementById("gendate").textContent=new Date().toLocaleDateString("nl-BE",{day:"numeric",month:"long",year:"numeric"});
+    return true;
+  }
+  const j=await r.json().catch(()=>({}));
+  return j.error||"wrong_password";
+}
+(function init(){
+  document.getElementById("loginBtn").onclick=async()=>{
+    const pw=document.getElementById("loginPass").value;
+    const res=await doLogin(pw);
+    if(res!==true) showLogin(res==="no_password_set"?"Teamwachtwoord nog niet ingesteld op de server.":"Onjuist wachtwoord.");
+  };
+  document.getElementById("loginPass").addEventListener("keydown",e=>{ if(e.key==="Enter")document.getElementById("loginBtn").click(); });
+  // probeer bewaard wachtwoord (sessie)
+  const saved=sessionStorage.getItem("dockx_pass");
+  if(saved){ doLogin(saved).then(ok=>{ if(ok!==true) showLogin(); }); }
+  else showLogin();
+})();
+</script>
+</body>
+</html>
