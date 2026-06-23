@@ -60,8 +60,9 @@ export async function onRequest(context) {
     return json({ ok: false, error: "wrong_password" }, 401);
   }
 
-  // Everything below requires auth
-  if (!checkAuth(request, env)) {
+  // Everything below requires auth — behalve beacon-POSTs (die authenticeren via de body)
+  const isBeaconReq = url.searchParams.get("beacon") === "1" && method === "POST";
+  if (!isBeaconReq && !checkAuth(request, env)) {
     return json({ error: "unauthorized" }, 401);
   }
 
@@ -86,6 +87,16 @@ export async function onRequest(context) {
       body = await request.json();
     } catch (e) {
       return json({ error: "bad_json" }, 400);
+    }
+    // Beacon-verzoeken (paginaverlaten) kunnen geen header zetten: wachtwoord zit in de body
+    const isBeacon = url.searchParams.get("beacon") === "1";
+    if (isBeacon) {
+      const expected = env.TEAM_PASSWORD || "";
+      if (expected === "" || (body.pass || "") !== expected) {
+        return json({ error: "unauthorized" }, 401);
+      }
+    } else if (!checkAuth(request, env)) {
+      return json({ error: "unauthorized" }, 401);
     }
     const topic = body.topic;
     if (!topic || typeof topic !== "string") return json({ error: "no_topic" }, 400);
